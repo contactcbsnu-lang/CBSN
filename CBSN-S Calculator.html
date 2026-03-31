@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBSN-S Smart Facility Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
+        .dashboard-card {
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        .stat-card {
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .gradient-blue { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+        .mockup-link {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .link-pdf { background: #fee2e2; color: #991b1b; }
+        .link-video { background: #dcfce7; color: #166534; }
+        .mockup-link:hover { opacity: 0.8; transform: scale(1.05); }
+        
+        /* Custom scrollbar for equipment list */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-6xl font-extrabold text-blue-900 tracking-tighter">CBSN</h1>
+                <p class="text-blue-600 font-bold text-lg tracking-widest uppercase">Department: CBSN-S</p>
+                <p class="text-gray-400 text-sm">Powered by Cross Border Study Network</p>
+            </div>
+            <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-blue-100 text-center">
+                <p class="text-xs text-gray-500 font-bold uppercase">Exam Commitment</p>
+                <p class="text-2xl font-black text-blue-700">24 Exams / Year</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Sidebar: Inputs -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="dashboard-card p-6">
+                    <h2 class="text-sm font-black text-gray-400 uppercase mb-4 tracking-widest">Input Parameters</h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-gray-500 mb-2">Total Students</label>
+                        <input type="number" id="studentCount" value="100" min="1" 
+                            class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-blue-500 outline-none text-2xl font-bold"
+                            oninput="calculate()">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-500 mb-2">Payment Frequency</label>
+                        <button onclick="setRate(110, 'Monthly', this)" class="rate-btn w-full p-4 text-left border-2 border-blue-600 bg-blue-50 rounded-2xl font-bold transition-all">
+                            Monthly (₹110)
+                        </button>
+                        <button onclick="setRate(108, 'Quarterly', this)" class="rate-btn w-full p-4 text-left border-2 border-transparent bg-gray-50 rounded-2xl font-bold hover:bg-gray-100 transition-all">
+                            Quarterly (₹108)
+                        </button>
+                        <button onclick="setRate(105, 'Yearly', this)" class="rate-btn w-full p-4 text-left border-2 border-transparent bg-gray-50 rounded-2xl font-bold hover:bg-gray-100 transition-all">
+                            Yearly (₹105)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Business Quote Section -->
+                <div class="stat-card gradient-blue text-white shadow-xl flex flex-col justify-center min-h-[200px]">
+                    <span class="text-4xl mb-4 opacity-50">"</span>
+                    <p class="text-xl font-bold leading-tight italic">
+                        Siksha hi unnati ka asli aadhar hai, aur CBSN aapka sabse bharosemand saathi.
+                    </p>
+                    <p class="text-xs mt-4 opacity-70 font-bold uppercase tracking-widest">— CBSN Vision 2026</p>
+                    <div class="mt-6 pt-4 border-t border-white/20">
+                        <p class="text-xs opacity-80 font-bold">Total Annual Revenue</p>
+                        <p id="totalRevenue" class="text-xl font-bold tracking-tight">₹0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Panel -->
+            <div class="lg:col-span-3 space-y-6">
+                
+                <!-- Live Portal Banner -->
+                <div class="dashboard-card p-6 border-l-8 border-green-600 bg-gradient-to-r from-green-50 to-white">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">📱</div>
+                            <div>
+                                <h3 class="text-xl font-black text-green-900">Live Result & Admit Card Portal</h3>
+                                <p class="text-sm text-green-700 font-medium italic">Har mahine 2 test ke baad result live hoga. Bachhe board ki tarah ghar baithe check karenge.</p>
+                                <div class="flex gap-2 mt-2">
+                                    
+                                    <a href="#" class="mockup-link link-video">Preview Video</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center md:text-right bg-white p-3 rounded-xl shadow-sm border border-green-100">
+                            <p class="text-[10px] font-bold text-green-600 uppercase">Cost for Schools</p>
+                            <span class="block text-xl font-black text-green-700">₹0 (Lifetime*)</span>
+                            <p class="text-[9px] text-gray-400 mt-1">*Post-association: ₹300/month only.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Assets -->
+                <div class="dashboard-card p-6 border-l-8 border-purple-600 bg-gradient-to-r from-purple-50 to-white">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div class="flex items-center gap-4">
+                            <div class="text-4xl">🌐</div>
+                            <div>
+                                <h3 class="text-xl font-black text-purple-900">Custom ERP & Web Application</h3>
+                                <p class="text-sm text-purple-700 font-medium">Fully functional for Admin, Staff, and Students.</p>
+                            </div>
+                        </div>
+                        <div class="text-center md:text-right">
+                            <p class="text-[10px] font-bold text-purple-400 uppercase">System Status</p>
+                            <span id="erpStatus" class="inline-block px-4 py-2 bg-purple-600 text-white rounded-full font-bold text-sm shadow-lg">
+                                After 1 Year Completion
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Academic Products -->
+                    <div class="dashboard-card p-6">
+                        <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="text-blue-500">📄</span> Academic Products
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                                <div>
+                                    <span class="text-sm font-medium block text-blue-900">Question Papers (24 Sets)</span>
+                                    <div class="flex gap-2 mt-1">
+                                        <a href="https://drive.google.com/file/d/1jDTeRqnBq1uMN6dmx4Vu5o1DZMWR83Nf/view?usp=sharing" class="mockup-link link-pdf">Mockup PDF</a>
+                                        <a href="#" class="mockup-link link-video">Sample Video</a>
+                                    </div>
+                                </div>
+                                <span id="qPapers" class="font-black text-lg">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                                <div>
+                                    <span class="text-sm font-medium block text-blue-900">Answer Sheets</span>
+                                    <div class="flex gap-2 mt-1">
+                                        <a href="https://drive.google.com/file/d/1AsBvcb92_65YzHMfryqhU_3R9-Y5zvfk/view?usp=sharing" class="mockup-link link-pdf">Mockup PDF</a>
+                                        <a href="#" class="mockup-link link-video">Sample Video</a>
+                                    </div>
+                                </div>
+                                <span id="aSheets" class="font-black text-lg">0</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                                <div>
+                                    <span class="text-sm font-bold block text-blue-800">Monthly Results (2 Tests/mo)</span>
+                                    <div class="flex gap-2 mt-1">
+                                        <a href="https://drive.google.com/file/d/1gO997nLGb4ZQRcQGwZ27tfYsA2-kvKSP/view?usp=sharing" class="mockup-link link-pdf">Result PDF</a>
+                                        <a href="#" class="mockup-link link-video">Result Quality</a>
+                                    </div>
+                                </div>
+                                <span id="resultsCount" class="font-black text-lg text-blue-900">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rewards & Gifts -->
+                    <div class="dashboard-card p-6">
+                        <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="text-green-500">🎁</span> Rewards & Recognition
+                        </h3>
+                        <div class="grid grid-cols-1 gap-3">
+                            <!-- Best Teacher Award -->
+                            <div class="p-3 bg-amber-50 rounded-xl flex justify-between items-center border border-amber-100">
+                                <div>
+                                    <p class="text-[10px] font-black text-amber-600 uppercase tracking-wider">Best Teacher Award</p>
+                                    <div class="flex gap-2 mt-1">
+                                        <a href="https://drive.google.com/file/d/1hnciCxK9J_seslHcD6egP5fJ9udNOWW5/view?usp=sharing" class="mockup-link link-pdf">Certificate</a>
+                                        
+                                    </div>
+                                </div>
+                                <p id="teacherAwardAmt" class="text-lg font-black text-amber-800">₹0</p>
+                            </div>
+                            <!-- Scholarship -->
+                            <div class="p-3 bg-green-50 rounded-xl flex justify-between items-center border border-green-100">
+                                <p class="text-xs font-bold text-green-800">Scholarship Fund</p>
+                                <p id="scholarshipAmt" class="text-lg font-black text-green-900">₹0</p>
+                            </div>
+                            <!-- Gifts -->
+                            <div class="p-3 bg-red-50 rounded-xl flex justify-between items-center border border-red-100">
+                                <div>
+                                    <p class="text-[10px] font-black text-red-600 uppercase">Consolation Gifts</p>
+                                    <div class="flex gap-2 mt-1">
+                                        <a href="https://example.com/gift-list.pdf" target="_blank" class="mockup-link link-pdf">Gift List PDF</a>
+                                        <a href="#" class="mockup-link link-video">Unboxing Video</a>
+                                    </div>
+                                </div>
+                                <p id="giftsAmt" class="text-lg font-black text-red-800">₹0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipment Section -->
+                <div class="dashboard-card p-6 border-t-8 border-orange-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <div>
+                            <h3 class="font-black text-2xl text-gray-800 flex items-center gap-2">
+                                <span class="text-orange-500">🛠️</span> School Upgrade Equipment
+                            </h3>
+                            <p class="text-xs text-gray-400 font-bold uppercase mt-1">Integrated ₹5,000 - ₹5,00,000 Premium List</p>
+                        </div>
+                        <div class="bg-orange-50 border border-orange-100 px-4 py-2 rounded-2xl text-right">
+                            <p class="text-[10px] font-bold text-orange-400 uppercase">Current Equipment Budget</p>
+                            <p id="equipFund" class="text-2xl font-black text-orange-600">₹0</p>
+                        </div>
+                    </div>
+
+                    <!-- Highlighted Recommendation -->
+                    <div id="primaryEquipBox" class="mb-6 p-5 bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-3xl shadow-xl hidden">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="px-3 py-1 bg-orange-500 text-[10px] font-black rounded-full uppercase">Top Recommendation</span>
+                                <h4 id="primaryEquipName" class="text-2xl font-black mt-2">Equipment Name</h4>
+                                <p id="primaryEquipVal" class="text-orange-400 font-bold text-sm">Value: ₹0</p>
+                                <a href="https://drive.google.com/file/d/1SHzrAqQAmlXwGFOn7cqmD5MYq0cPcih1/view?usp=sharing" class="mockup-link link-pdf">Equipment list PDF</a>
+                            </div>
+                            <div class="text-4xl">🏆</div>
+                        </div>
+                    </div>
+
+                    <div id="equipmentList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
+                        <!-- Items populated from JS -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+             <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm relative">
+                 <div class="text-2xl mb-1">👔</div>
+                 <p class="text-[10px] font-bold text-gray-400 uppercase">T-Shirts</p>
+                 <p id="tshirtsCount" class="text-lg font-black">0</p>
+                 <div class="flex justify-center gap-1 mt-1">
+                     <a href="https://drive.google.com/file/d/13yI0Cl8-wBmp7O94HxbRLw4KLhfCLoKr/view?usp=sharing" class="mockup-link link-pdf">Design</a>
+                     <a href="#" class="mockup-link link-video">Video</a>
+                 </div>
+                 <p class="text-[10px] text-green-600 font-bold mt-1">
+                    Resale Opportunity: School T-Shirts ko margin ke saath bech sakta hai
+                </p>
+                 <p class="text-[10px] text-green-600 font-bold mt-1">
+                    <U>Resale: MRP:- ₹250per student</U> 
+                </p>
+                <p class="text-[11px] text-green-800 font-black">
+                    Total Profit: <span id="tshirtProfit">₹0</span>
+                </p>
+             </div>
+             <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                 <div class="text-2xl mb-1">🪪</div>
+                 <p class="text-[10px] font-bold text-gray-400 uppercase">ID Cards</p>
+                 <p id="idCardsCount" class="text-lg font-black">0</p>
+                 <p class="text-[10px] text-green-600 font-bold mt-1">
+                    Resale Opportunity: ID Cards se bhi school extra income kama sakta hai
+                </p>
+
+                <p class="text-[10px] text-green-600 font-bold mt-1">
+                    <U>Resale: MRP:- ₹30 per student</U>
+                </p>
+                <p class="text-[11px] text-green-800 font-black">
+                    Total Profit: <span id="idProfit">₹0</span>
+                </p>
+             </div>
+             <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                 <div class="text-2xl mb-1">📣</div>
+                 <p class="text-[10px] font-bold text-gray-400 uppercase">8x4 Banners</p>
+                 <p id="banner8x4" class="text-lg font-black">0</p>
+                 <p class="text-[10px] text-blue-600 font-bold mt-1">
+                <a href="https://drive.google.com/file/d/1JboxXlVjVePuY4ajK6EQhPnziHOq6fOl/view?usp=sharing" class="mockup-link link-pdf">Design</a><br>
+                    <b><u>Key Responsibility:-</u> <br> </b>Design & Printing by CBSN | Installation by School
+                </p>
+             </div>
+             <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                 <div class="text-2xl mb-1">🚩</div>
+                 <p class="text-[10px] font-bold text-gray-400 uppercase">3x4 Banners</p>
+                 <p id="banner3x4" class="text-lg font-black">0</p>
+                 <p class="text-[10px] text-blue-600 font-bold mt-1">
+                <a href="https://drive.google.com/file/d/1yt32bcga6SfcHjoiiLZly0H-W6-jpntF/view?usp=sharing" class="mockup-link link-pdf">Design</a><br>
+                    <b><u>Key Responsibility:-</u> <br> </b>Design & Printing by CBSN | Installation by School
+                </p>
+             </div>
+             <div class="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm col-span-2 md:col-span-1">
+                 <div class="text-2xl mb-1">📊</div>
+                 <p class="text-[10px] font-bold text-gray-400 uppercase">Marketing Fund</p>
+                 <p id="bannerFund" class="text-lg font-black">₹0</p>
+             </div>
+        </div>
+
+        <footer class="mt-12 text-center text-gray-400 text-[10px] font-medium pb-8 uppercase tracking-widest">
+            10 ID card for Teachers will be provided by us for free any further increasing no in it will cost extra 70 rupees Per card for Teachers ID card
+            *ERP, Web App & Result Portal service included while school is with CBSN. Post association, Portal maintenance: ₹300/mo.
+        </footer>
+    </div>
+
+    <script>
+        let currentRate = 110;
+        let currentType = 'Monthly';
+
+        // 100 Item Physical Equipment Database
+        const fullEquipDb = [
+            {amt: 5000, name: "1 Large Magnetic Whiteboard", desc: "Premium writing surface with marker tray."},
+            {amt: 10000, name: "2 Ergonomic Staff Chairs", desc: "Adjustable height with lumbar support."},
+            {amt: 15000, name: "Steel Book Rack for Library", desc: "6-shelf heavy-duty storage unit."},
+            {amt: 20000, name: "3-Stage UV Water Purifier", desc: "Wall-mounted high-flow purification."},
+            {amt: 25000, name: "Set of 3 Dual-Seater Benches", desc: "Steel frame with wooden top."},
+            {amt: 30000, name: "Heavy Duty Laser Printer", desc: "Network enabled high-speed office printer."},
+            {amt: 35000, name: "Portable PA System", desc: "Amplifier + Wireless Mic & Stand set."},
+            {amt: 40000, name: "Full Desktop PC Set", desc: "i3/i5 Processor with 19\" LED Monitor."},
+            {amt: 45000, name: "5 High-Speed Ceiling Fans", desc: "Energy efficient wide-blade fans."},
+            {amt: 50000, name: "43\" LED Display for AV Room", desc: "Smart UHD Panel for digital learning."},
+            {amt: 55000, name: "Complete Cricket Kit & Net", desc: "Pads, Bats, Balls & 20ft Practice Net."},
+            {amt: 60000, name: "8 Wall Display Boards", desc: "Soft-board pin-up panels for corridors."},
+            {amt: 65000, name: "Double Door Steel Almirah", desc: "Heavy gauge security locker for records."},
+            {amt: 70000, name: "4 CCTV Cameras & DVR", desc: "Full HD night vision with 1TB storage."},
+            {amt: 75000, name: "1.5 KVA Inverter & Battery", desc: "Pure sine wave with tall tubular battery."},
+            {amt: 80000, name: "Principal's Desk Set", desc: "Executive desk + 3 Visitor chairs."},
+            {amt: 85000, name: "Set of 5 Classroom Desks", desc: "Combined bench-desk unit for students."},
+            {amt: 90000, name: "Short-Throw Projector", desc: "Classroom grade high-lumen projector."},
+            {amt: 95000, name: "Science Lab Microscope Set", desc: "3 Compound microscopes with slides kit."},
+            {amt: 100000, name: "Staff Room Locker (12 Cab)", desc: "Individual secure cabinets for teachers."},
+            {amt: 105000, name: "Wooden Lab Workstations", desc: "Set of 4 heavy duty science tables."},
+            {amt: 110000, name: "Kindergarten Rubber Flooring", desc: "Anti-skid soft mats for play area."},
+            {amt: 115000, name: "10 Green Chalkboards", desc: "Non-reflective ceramic coated boards."},
+            {amt: 120000, name: "80L Stainless Water Cooler", desc: "Internal storage with 2 taps setup."},
+            {amt: 125000, name: "Fire Safety Set (8 Cyl)", desc: "ABC type cylinders with fire buckets."},
+            {amt: 130000, name: "Window Blinds (10 Rooms)", desc: "Heat reflective roller blinds set."},
+            {amt: 135000, name: "Metal Podium with Mic", desc: "Powder coated stand with gooseneck mic."},
+            {amt: 140000, name: "15 Steel Folding Chairs", desc: "Event seating with padded support."},
+            {amt: 145000, name: "Outdoor LED Floodlights", desc: "Campus boundary lighting system."},
+            {amt: 150000, name: "Physical Library Collection", desc: "Curated set of 500+ Reference books."},
+            {amt: 155000, name: "Wall-Mounted Water Fountain", desc: "Automatic sensor based drinking unit."},
+            {amt: 160000, name: "Core i5 Office Laptop", desc: "Business grade with 512GB SSD."},
+            {amt: 165000, name: "Physics Lab Optics Kits", desc: "Prisms, Lenses, and Laser bench set."},
+            {amt: 170000, name: "Main Entrance Iron Gate", desc: "Designer heavy-duty sliding gate."},
+            {amt: 175000, name: "2 KVA Online UPS System", desc: "Zero lag backup for computer lab."},
+            {amt: 180000, name: "Medical Room Equipment", desc: "Bed, BP Monitor, and Emergency kit."},
+            {amt: 185000, name: "Geography Globes & 3D Maps", desc: "Large topographic models set."},
+            {amt: 190000, name: "Musical Instruments Set", desc: "Harmonium, Tabla, and Bass Drum."},
+            {amt: 195000, name: "Heavy Photocopier Machine", desc: "A3 size multi-function copier."},
+            {amt: 200000, name: "10 Classroom Cupboards", desc: "Storage units for student bags/books."},
+            {amt: 205000, name: "Garden Lawn Mower & Tools", desc: "Electric mower with landscape kit."},
+            {amt: 210000, name: "1KW Off-Grid Solar Plant", desc: "Panels + Controller for office load."},
+            {amt: 215000, name: "Assembly Wooden Flooring", desc: "Stage area renovation with teak wood."},
+            {amt: 220000, name: "2000L Water Tank Setup", desc: "Overhead tank with plumbing fitting."},
+            {amt: 225000, name: "Computer Lab Networking", desc: "CAT6 cabling with 24-port switch rack."},
+            {amt: 230000, name: "Office Shredder & Laminator", desc: "High volume document security tools."},
+            {amt: 235000, name: "Maths Lab Geometry Models", desc: "Transparent 3D shapes & Abacus set."},
+            {amt: 240000, name: "Sound Mixer & Speakers", desc: "Professional auditorium audio gear."},
+            {amt: 245000, name: "32\" Monitoring Screen Wall", desc: "Matrix wall for security room view."},
+            {amt: 250000, name: "Chemistry Lab Fume Hood", desc: "Ventilated cabinet with granite top."},
+            {amt: 255000, name: "Sanitary Ware Fitting", desc: "Complete washroom taps & flush set."},
+            {amt: 260000, name: "Vitrified Tiles (2 Rooms)", desc: "Flooring upgrade for classrooms."},
+            {amt: 265000, name: "Iron Window Grills", desc: "Security bars for ground floor block."},
+            {amt: 270000, name: "1.5 Ton Split AC (Office)", desc: "5-star rated inverter air conditioner."},
+            {amt: 275000, name: "High-Jump Pit Mats", desc: "Professional sports landing foam mats."},
+            {amt: 280000, name: "3 Premium Admin PCs", desc: "Core i7 high-speed office stations."},
+            {amt: 285000, name: "6 Library Reading Tables", desc: "Large 6-seater wooden study tables."},
+            {amt: 290000, name: "Lab Gas Pipeline System", desc: "Centralized burner connection with safety."},
+            {amt: 295000, name: "Basketball Poles & Board", desc: "Professional height adjustable set."},
+            {amt: 300000, name: "Industrial RO Plant", desc: "250 Liters Per Hour large capacity."},
+            {amt: 305000, name: "Outdoor Open Gym Gear", desc: "3 fundamental outdoor fitness machines."},
+            {amt: 310000, name: "Stage Motorized Curtains", desc: "Remote control velvet stage drapes."},
+            {amt: 315000, name: "Intercom System (16 Line)", desc: "Phone connectivity for all rooms."},
+            {amt: 320000, name: "Large Outdoor Digital Board", desc: "Scrolling LED board for announcements."},
+            {amt: 325000, name: "Server Hardware Rack", desc: "Secure enclosure with cooling fans."},
+            {amt: 330000, name: "Multi-Play Station", desc: "Large playground slide & climber unit."},
+            {amt: 335000, name: "55\" Interactive Touch Panel", desc: "Digital smart board for teaching."},
+            {amt: 340000, name: "Bio-metric Turnstile Gate", desc: "Automatic entry gate for students."},
+            {amt: 345000, name: "16-Ch HD CCTV Upgrade", desc: "Full campus surveillance network."},
+            {amt: 350000, name: "Aluminum Window Frames", desc: "Modern sliding window replacement."},
+            {amt: 355000, name: "Office Partition Walls", desc: "Glass/Aluminium cabins for staff."},
+            {amt: 360000, name: "3KW Solar Power System", desc: "Hybrid system to reduce energy bills."},
+            {amt: 365000, name: "120\" Motorized Screen", desc: "Large projection surface for hall."},
+            {amt: 370000, name: "Human Anatomy Lab Models", desc: "Full skeleton & Organ display set."},
+            {amt: 375000, name: "Language Lab Consoles", desc: "Headset & audio hub for 20 students."},
+            {amt: 380000, name: "Library Wooden Cabinets", desc: "Traditional catalog and card storage."},
+            {amt: 385000, name: "Reception Lobby Decor", desc: "Sofa set with branding counter."},
+            {amt: 390000, name: "Boundary Chain Link Fence", desc: "Fencing for the entire school field."},
+            {amt: 395000, name: "Rainwater Harvesting Tank", desc: "Collection pit with filtration pipes."},
+            {amt: 400000, name: "5 PC Student Lab Setup", desc: "Ready to use mini computer lab."},
+            {amt: 405000, name: "100 Auditorium Chairs", desc: "Linkable plastic seating for hall."},
+            {amt: 410000, name: "Campus Lighting Poles", desc: "Decorative garden LED poles set."},
+            {amt: 415000, name: "Automatic School Bell", desc: "Programmable siren with period alerts."},
+            {amt: 420000, name: "Glass Lab Partition", desc: "Toughened glass walls for computer lab."},
+            {amt: 425000, name: "3 Teaching Tablets", desc: "Stylus based tablets for educators."},
+            {amt: 430000, name: "Synthetic Sports Track", desc: "All-weather track surfacing (partial)."},
+            {amt: 435000, name: "2 Ton AC for Hall", desc: "High capacity cooling for meetings."},
+            {amt: 440000, name: "Full Campus WiFi Network", desc: "Cisco/TP-Link routers with cabling."},
+            {amt: 445000, name: "Diesel Generator (Small)", desc: "Emergency power for fans & office."},
+            {amt: 450000, name: "False Ceiling with LED", desc: "Modern ceiling design for admin block."},
+            {amt: 455000, name: "Biology Specimen Jars", desc: "Full collection of lab preserved items."},
+            {amt: 460000, name: "Steel Waiting Benches", desc: "Set of 5 heavy duty airport-style seats."},
+            {amt: 465000, name: "10 Solar Street Lights", desc: "Standalone poles for night security."},
+            {amt: 470000, name: "Stone Garden Benches", desc: "Decorative concrete seating for park."},
+            {amt: 475000, name: "Premium Server Hardware", desc: "Rack server for school database management."},
+            {amt: 480000, name: "External Weather Paint", desc: "Full building exterior painting material."},
+            {amt: 485000, name: "Large Spiral Slide", desc: "Premium playground equipment for kids."},
+            {amt: 490000, name: "Physics Electricity Panels", desc: "Individual student practice stations."},
+            {amt: 495000, name: "Lab Safety Shower Station", desc: "Emergency wash for chemistry labs."},
+            {amt: 500000, name: "Integrated Smart Class Hub", desc: "Interactive panel + Server + Audio cabinet."}
+        ];
+
+        function setRate(val, type, el) {
+            currentRate = val;
+            currentType = type;
+            document.querySelectorAll('.rate-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'bg-blue-50');
+                btn.classList.add('border-transparent', 'bg-gray-50');
+            });
+            el.classList.remove('border-transparent', 'bg-gray-50');
+            el.classList.add('border-blue-600', 'bg-blue-50');
+            calculate();
+        }
+
+        function formatINR(num) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+        }
+
+        function calculate() {
+            const count = parseInt(document.getElementById('studentCount').value) || 0;
+            const revenue = count * currentRate * 12;
+            const scholarship = count * 125;
+            const teacherAward = count * 25;
+            const gifts = count * 50;
+            const bannerFund = count * 11.25;
+            const equipFund = count * 112;
+
+            document.getElementById('totalRevenue').innerText = formatINR(revenue);
+            document.getElementById('scholarshipAmt').innerText = formatINR(scholarship);
+            document.getElementById('teacherAwardAmt').innerText = formatINR(teacherAward);
+            document.getElementById('giftsAmt').innerText = formatINR(gifts);
+            document.getElementById('equipFund').innerText = formatINR(equipFund);
+            document.getElementById('bannerFund').innerText = formatINR(bannerFund);
+
+            // Academic product calculations
+            document.getElementById('qPapers').innerText = (count * 24).toLocaleString();
+            document.getElementById('aSheets').innerText = (count * 24).toLocaleString();
+            document.getElementById('resultsCount').innerText = (count*12).toLocaleString();
+            
+            document.getElementById('tshirtsCount').innerText = count.toLocaleString();
+            document.getElementById('idCardsCount').innerText = (count + 10).toLocaleString();
+            // Resale Profit Calculation
+            const tshirtCost = 0;
+            const tshirtPrice = 250;
+            const tshirtProfit = (tshirtPrice - tshirtCost) * count;
+
+            const idCost = 0;
+            const idPrice = 30;
+            const idProfit = (idPrice - idCost) * count;
+
+            document.getElementById('tshirtProfit').innerText = formatINR(tshirtProfit);
+            document.getElementById('idProfit').innerText = formatINR(idProfit);
+            document.getElementById('banner8x4').innerText = Math.floor(bannerFund / 640);
+            document.getElementById('banner3x4').innerText = Math.floor((bannerFund % 640) / 240);
+
+            // ERP/System Status
+            const erpStatus = document.getElementById('erpStatus');
+            if (currentType === 'Yearly') {
+                erpStatus.innerText = "Within 15 Days";
+                erpStatus.className = "inline-block px-4 py-2 bg-green-600 text-white rounded-full font-bold text-sm shadow-lg animate-pulse";
+            } else {
+                erpStatus.innerText = "After 1 Year Completion";
+                erpStatus.className = "inline-block px-4 py-2 bg-purple-600 text-white rounded-full font-bold text-sm shadow-lg";
+            }
+
+            // Equipment Recommendation
+            const listEl = document.getElementById('equipmentList');
+            const primaryBox = document.getElementById('primaryEquipBox');
+            listEl.innerHTML = '';
+            
+            let topItem = null;
+            let availableItems = fullEquipDb.filter(item => item.amt <= equipFund);
+
+            if (availableItems.length > 0) {
+                topItem = availableItems[availableItems.length - 1];
+                primaryBox.classList.remove('hidden');
+                document.getElementById('primaryEquipName').innerText = topItem.name;
+                document.getElementById('primaryEquipVal').innerText = `Value: ${formatINR(topItem.amt)}`;
+
+                availableItems.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:border-orange-300 transition-colors cursor-default";
+                    div.innerHTML = `
+                        <p class="font-black text-xs text-gray-800 uppercase leading-tight">${item.name}</p>
+                        <p class="text-[9px] text-gray-400 mt-1">${item.desc}</p>
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-50">
+                            <span class="text-[10px] font-bold text-orange-600">${formatINR(item.amt)}</span>
+                            <span class="text-[9px] text-green-500 font-bold">● Included</span>
+                        </div>
+                    `;
+                    listEl.appendChild(div);
+                });
+            } else {
+                primaryBox.classList.add('hidden');
+                listEl.innerHTML = '<p class="text-xs text-gray-400 italic p-4 text-center col-span-full">Bachhon ka count badhaiye equipment fund unlock karne ke liye...</p>';
+            }
+        }
+        window.onload = calculate;
+    </script>
+</body>
+</html>
+
