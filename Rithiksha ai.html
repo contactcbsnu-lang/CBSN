@@ -11,13 +11,13 @@
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             -webkit-tap-highlight-color: transparent;
-            background-color: #06080e;
+            background-color: #04060a;
         }
         .font-outfit { font-family: 'Outfit', sans-serif; }
         
-        /* Ultra Premium Glowing & Glassmorphism Theme */
+        /* Premium Glowing & Glassmorphism Theme */
         .glass-panel { 
-            background: rgba(13, 18, 30, 0.85); 
+            background: rgba(10, 15, 30, 0.85); 
             backdrop-filter: blur(24px); 
             border: 1px solid rgba(255, 255, 255, 0.05); 
         }
@@ -29,8 +29,8 @@
         }
         .glass-card:hover {
             background: rgba(255, 255, 255, 0.05); 
-            border-color: rgba(99, 102, 241, 0.25);
-            box-shadow: 0 30px 60px -15px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 30px 60px -15px rgba(99, 102, 241, 0.25);
             transform: translateY(-4px);
         }
 
@@ -132,7 +132,7 @@
         </aside>
 
         <!-- Main Workspace Content -->
-        <main class="flex-1 flex flex-col min-w-0 bg-[#06080d]">
+        <main class="flex-1 flex flex-col min-w-0 bg-[#04060a]">
             
             <!-- Header bar with Quick Action and balance tracking -->
             <header class="flex items-center justify-between px-6 lg:px-10 py-4 bg-slate-950/50 backdrop-blur-xl border-b border-slate-900 sticky top-0 z-30">
@@ -176,7 +176,7 @@
 
     <script>
         // --- Gemini Config & API Utilities ---
-        const apiKey = ""; // Environment handles Key provisioning at runtime
+        const apiKey = ""; // Built-in runtime key handler
         const YOUTUBE_API_KEY = "AIzaSyB5e1HpwuO4_4mx51JvMtx2xS5qB5dqPCU";
 
         // Exponential backoff fetch function
@@ -221,7 +221,7 @@
                 feasibilityStatus: null,
                 aiDiagnosisReason: '',
                 aiDiagnosisRecommendation: '',
-                aiSyllabusPhases: []
+                aiSyllabusTopics: [] // Purified actual syllabus topics from Gemini
             },
             
             activeDay: 1,
@@ -359,7 +359,7 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
-        // --- Gemini Integration for Real-world Feasibility Check ---
+        // --- Gemini Integration for Real-world Feasibility & Syllabus Extraction Check ---
         async function processFeasibilityForm(e) {
             e.preventDefault();
             const name = document.getElementById('form-name').value;
@@ -381,35 +381,37 @@
             state.loadingAI = true;
             render();
 
-            // Structuring complex system prompt for evaluation
+            // High Precision Prompts instructing Gemini to search the internet for exact syllabus topics
             const systemPrompt = `You are the primary cognitive architect of Rithiksha AI Educational Ecosystem. 
-            You evaluate whether a student's preparation schedule is possible.
-            You must verify the eligibility metrics and provide deep syllabus phases.
+            You must evaluate whether a student's preparation schedule is realistically possible.
+            You must search the internet or use your knowledge to fetch the EXACT, REAL-WORLD syllabus topics for the requested exam.
             All your explanations, reasons, and recommendations must be in Hinglish (Hindi written in Latin script).
             All mathematical/scientific equations or values must be formatted using LaTeX-style syntax like $X$ or $$Y$$.
             You must return strictly valid JSON matching the exact schema specified in the request. No markdown wrappers.`;
 
-            const userQuery = `Evaluate the feasibility of preparation for ${targetExam} with:
+            const userQuery = `Examine the real-world syllabus details for the exam: "${targetExam}".
+            Student profile:
             Name: ${name}
             DOB: ${dob} (Age: ${calculatedAge})
-            Qualification: ${qualification}
+            Current Qualification: ${qualification}
             Status: ${status}
             Daily Study Hours: ${hours} hours
-            Days until Exam: ${totalDays} days.
+            Total Days available: ${totalDays} days.
+            
+            First, analyze if completing the full real-world syllabus is mathematically and practically possible in ${totalDays} days at ${hours} hours/day.
+            Then, provide a list of exactly 15 to 20 highly detailed, distinct sequential syllabus topics/chapters (no filler tasks, only core curriculum chapters) that represent the actual exam.
+            
             Return a JSON object conforming exactly to this structure:
             {
               "feasibilityStatus": "YES" or "NO",
-              "reason": "Clear analytical reason in Hinglish explaining syllabus load versus time constraint using math equations where appropriate.",
-              "recommendation": "Detailed study guidance in Hinglish suggesting exactly how much study hours or days are required if not feasible.",
-              "phases": [
-                {
-                  "phaseName": "Phase Title",
-                  "daysRange": "Day X to Y",
-                  "focusTopics": ["Topic 1", "Topic 2", "Topic 3"]
-                }
+              "reason": "Clear analytical feasibility reason in Hinglish using LaTeX equations explaining exactly how many hours are needed vs available.",
+              "recommendation": "Detailed Hinglish study guidance suggesting the precise adjustment needed (extra hours or days) to comfortably clear the real syllabus.",
+              "syllabusTopics": [
+                "Detailed Chapter 1 Name with specific sub-topics",
+                "Detailed Chapter 2 Name with specific sub-topics",
+                "Detailed Chapter 3 Name with specific sub-topics"
               ]
-            }
-            Generate exactly 5 phases across the ${totalDays} days. Fill up all of them.`;
+            }`;
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
@@ -424,23 +426,12 @@
                             feasibilityStatus: { type: "STRING" },
                             reason: { type: "STRING" },
                             recommendation: { type: "STRING" },
-                            phases: {
+                            syllabusTopics: {
                                 type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        phaseName: { type: "STRING" },
-                                        daysRange: { type: "STRING" },
-                                        focusTopics: {
-                                            type: "ARRAY",
-                                            items: { type: "STRING" }
-                                        }
-                                    },
-                                    required: ["phaseName", "daysRange", "focusTopics"]
-                                }
+                                items: { type: "STRING" }
                             }
                         },
-                        required: ["feasibilityStatus", "reason", "recommendation", "phases"]
+                        required: ["feasibilityStatus", "reason", "recommendation", "syllabusTopics"]
                     }
                 }
             };
@@ -468,11 +459,11 @@
                     feasibilityStatus: parsedAI.feasibilityStatus,
                     aiDiagnosisReason: parsedAI.reason,
                     aiDiagnosisRecommendation: parsedAI.recommendation,
-                    aiSyllabusPhases: parsedAI.phases
+                    aiSyllabusTopics: parsedAI.syllabusTopics
                 };
 
                 if (parsedAI.feasibilityStatus === 'YES') {
-                    triggerNotification("Feasibility Confirmed", "AI ne aapka schedule verify kar liya hai! Syllabus dynamically mapping complete.");
+                    triggerNotification("Feasibility Confirmed", "AI ne aapka schedule aur real syllabus verify kar liya hai!");
                     buildDynamicRoadmapData();
                 } else {
                     triggerNotification("Timeline Alert", "Syllabus cover karne ke liye risk hai. Support lead has been forwarded.");
@@ -488,20 +479,23 @@
 
             } catch (error) {
                 console.error("AI Error:", error);
-                // Graceful fallback to maintain zero failure rate
-                const localFeasible = (totalDays * hours) >= 300 ? 'YES' : 'NO';
+                // Resilient fallback to maintain app execution in case of network issue
+                const localFeasible = (totalDays * hours) >= 150 ? 'YES' : 'NO';
                 state.profile = {
                     name, dob, age: calculatedAge, qualification, targetExam, status, hours, attemptDate, totalDays,
                     isVerified: true,
                     feasibilityStatus: localFeasible,
-                    aiDiagnosisReason: "Mathematical check: Available Study Window is sufficient for conceptual revisions.",
-                    aiDiagnosisRecommendation: "Spend at least $3$ hours daily focusing on high-weightage topics first.",
-                    aiSyllabusPhases: [
-                        { phaseName: "Foundational Phase", daysRange: `1 to ${Math.floor(totalDays*0.2)}`, focusTopics: ["Basic Introduction", "Structural Frameworks"] },
-                        { phaseName: "Analytical Deep Dive", daysRange: `${Math.floor(totalDays*0.2) + 1} to ${Math.floor(totalDays*0.5)}`, focusTopics: ["Core Complex Principles", "In-Depth Formula Practice"] },
-                        { phaseName: "Syllabus Core Execution", daysRange: `${Math.floor(totalDays*0.5) + 1} to ${Math.floor(totalDays*0.75)}`, focusTopics: ["Advanced Theory", "Doubt Clearing"] },
-                        { phaseName: "Cross Border Evaluation", daysRange: `${Math.floor(totalDays*0.75) + 1} to ${Math.floor(totalDays*0.9)}`, focusTopics: ["Practice Exams", "CBSNU Integration"] },
-                        { phaseName: "Sustained Revision Phase", daysRange: `${Math.floor(totalDays*0.9) + 1} to ${totalDays}`, focusTopics: ["Quick Formula Updates", "Final Mock Tests"] }
+                    aiDiagnosisReason: "Mathematical baseline calculation: Available study window is sufficient for fundamental reviews.",
+                    aiDiagnosisRecommendation: "Increase your study speed by allocating at least $3$ hours daily.",
+                    aiSyllabusTopics: [
+                        "Mathematical Foundations & Real Numbers",
+                        "Physics: Mechanics, Kinematics & Laws of Motion",
+                        "Chemistry: Chemical Reactions, Acids & Bases",
+                        "Economics: Global Micro-economic Indicators",
+                        "Social Science: Ancient Civilizations and Frameworks",
+                        "Computer Science: Algorithms and Computational Structures",
+                        "Advanced Calculus & Coordinate Geometry",
+                        "Physics: Electromagnetism & Magnetic Effects of Current"
                     ]
                 };
                 if (localFeasible === 'YES') {
@@ -513,61 +507,50 @@
             }
         }
 
-        // Mapping Gemini AI phases and utilizing daily study hour blocks 
+        // Utilizing all study hours selected by the user, dedicating every single slot only to direct syllabus topics
         function buildDynamicRoadmapData() {
             state.roadmap = [];
             const totalHours = parseInt(state.profile.hours) || 2;
-            const phases = state.profile.aiSyllabusPhases;
+            const topics = state.profile.aiSyllabusTopics;
 
             for (let i = 1; i <= state.profile.totalDays; i++) {
-                // Find active phase based on current day index
-                let currentPhase = phases[0];
-                for (let p of phases) {
-                    const rangeParts = p.daysRange.split(' to ');
-                    const start = parseInt(rangeParts[0]) || 1;
-                    const end = parseInt(rangeParts[1]) || state.profile.totalDays;
-                    if (i >= start && i <= end) {
-                        currentPhase = p;
-                        break;
-                    }
-                }
-
                 const daySchedule = [];
-                const topicsAvailable = currentPhase.focusTopics;
                 
-                // Distribute daily hours dynamically
+                // Pure syllabus topic assignment per hour - absolutely zero filler tasks!
                 for (let h = 1; h <= totalHours; h++) {
-                    const topicIndex = (i + h) % topicsAvailable.length;
-                    const activeTopic = topicsAvailable[topicIndex];
-                    let task = "";
+                    // Sequence sequentially through the precise extracted syllabus topics
+                    const topicIndex = ((i - 1) * totalHours + (h - 1)) % topics.length;
+                    const activeTopic = topics[topicIndex];
                     
-                    if (h === 1) task = `Vidya AI Video Lecture: Conceptual mastery on ${activeTopic}`;
-                    else if (h === 2) task = `The Textbook Helper: Summarize and translate reference materials for ${activeTopic}`;
-                    else if (h === totalHours) task = `Rithiksha AI: Summary analysis & conceptual evaluation on ${activeTopic}`;
-                    else task = `Deep-dive problem sets & structural revisions for ${activeTopic}`;
-
-                    daySchedule.push({ hour: h, task, topic: activeTopic });
+                    daySchedule.push({ 
+                        hour: h, 
+                        task: `Complete Chapter Lesson on: ${activeTopic}`, 
+                        topic: activeTopic 
+                    });
                 }
 
                 state.roadmap.push({
                     day: i,
-                    theme: currentPhase.phaseName,
-                    topic: `Milestone: ${currentPhase.phaseName} - Day ${i}`,
+                    theme: `Syllabus Segment ${Math.ceil(i / (state.profile.totalDays / 5))}`,
+                    topic: `Day ${i} Curriculum Goal`,
                     schedule: daySchedule
                 });
             }
-            getVideos(1);
+            // Load videos for the first slot of Day 1
+            getVideos(1, state.roadmap[0].schedule[0].topic);
         }
 
-        async function getVideos(day) {
+        // YouTube API Fetcher based on clicked hour or selected day's topic
+        async function getVideos(day, customQuery = '') {
             state.loadingVideos = true;
             render();
 
             const currentDay = state.roadmap[day - 1];
             if (!currentDay) return;
-            const activeTopic = currentDay.schedule[0]?.topic || state.profile.targetExam;
-
-            const query = encodeURIComponent(`${state.profile.targetExam} ${activeTopic} detailed standard lecture`);
+            
+            // Search query target directly matching the core syllabus topic
+            const searchQuery = customQuery || currentDay.schedule[0]?.topic || state.profile.targetExam;
+            const query = encodeURIComponent(`${state.profile.targetExam} ${searchQuery} high quality class lecture`);
             const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=4&q=${query}&type=video&key=${YOUTUBE_API_KEY}`;
             
             try {
@@ -625,7 +608,7 @@
                             <div class="relative z-10 space-y-4 max-w-2xl">
                                 <span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] px-3.5 py-1 rounded-full font-black uppercase tracking-widest">Coin-Based Free Learning Hub</span>
                                 <h1 class="text-3xl lg:text-5xl font-black font-outfit tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-indigo-300">Har student ke liye elite classes, bilkul free.</h1>
-                                <p class="text-slate-400 text-sm">Swami Vivekananda's vision par aadharit: Padhai par dhyan lagayein, custom coins earn karein, aur complete classes perform karein bina unchi fees diye.</p>
+                                <p class="text-slate-400 text-sm font-medium">Swami Vivekananda's vision par aadharit: Padhai par dhyan lagayein, custom coins earn karein, aur complete classes perform karein bina unchi fees diye.</p>
                                 <div class="pt-2 flex flex-wrap gap-4">
                                     <button onclick="setView('study-bar')" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3.5 rounded-xl font-bold text-xs uppercase hover:scale-[1.02] transition-transform">Open Study Bar</button>
                                 </div>
@@ -838,7 +821,7 @@
                                         <h4 class="font-bold text-slate-200 text-sm flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-2 text-indigo-400"></i> Day ${state.activeDay} Daily Hour Breakdown:</h4>
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             ${day.schedule.map(s => `
-                                                <div class="p-3.5 bg-slate-950/60 border border-slate-900 rounded-2xl cursor-pointer hover:border-indigo-500/40 transition-colors" onclick="document.getElementById('lecture-video').src='https://www.youtube.com/embed/${state.activeVideoId}'">
+                                                <div class="p-3.5 bg-slate-950/60 border border-slate-900 rounded-2xl cursor-pointer hover:border-indigo-500/40 transition-colors" onclick="getVideos(${state.activeDay}, '${s.topic}')">
                                                     <p class="text-[9px] font-black text-indigo-400 uppercase">Hour ${s.hour}</p>
                                                     <p class="text-xs font-bold text-slate-200 mt-1">${s.task}</p>
                                                     <p class="text-[10px] text-slate-500 mt-2 italic">${s.topic}</p>
