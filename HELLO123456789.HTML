@@ -2550,31 +2550,43 @@
       e.target.reset();
     }
 
-    async function syncToGoogleSheet(action, payload) {
-      const endpoint = String(state.googleSheetUrl || '').trim();
-      if (!endpoint) return { ok: false, skipped: true };
-      try {
-        const url = new URL(endpoint);
-        if (url.protocol !== 'https:') throw new Error('Google Sheets endpoint must use HTTPS.');
-        const res = await fetch(url.href, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            action,
-            roll: payload?.roll || '',
-            name: payload?.name || payload?.studentName || '',
-            class: payload?.class || payload?.grade || '',
-            payload
-          })
-        });
-        return { ok: res.ok, status: res.status };
-      } catch (err) {
-        console.warn('Google Sheet sync notice:', err);
-        showToast('Sheet Sync Failed', err.message || 'Could not synchronize with Google Sheets.', '⚠️');
-        return { ok: false, error: err.message };
-      }
+async function syncToGoogleSheet(action, payload) {
+    if (!state.googleSheetUrl) {
+        console.warn("Google Sheets URL not configured.");
+        return false;
     }
 
+    try {
+        await fetch(state.googleSheetUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({
+                action: action,
+                roll: payload?.roll || '',
+                name: payload?.name || payload?.studentName || '',
+                class: payload?.class || payload?.grade || '',
+                payload: payload || {}
+            })
+        });
+
+        console.log("Google Sheets request sent:", action);
+        return true;
+
+    } catch (error) {
+        console.error("Google Sheets sync failed:", error);
+
+        showToast(
+            "Sheet Sync Failed",
+            error.message || "Unable to reach Google Sheets.",
+            "⚠️"
+        );
+
+        return false;
+    }
+}
     function saveStateToLocalStorage() {
       try {
         localStorage.setItem('cbsn_gallery', JSON.stringify(state.gallery));
