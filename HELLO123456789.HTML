@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
   <title>CBSN-S | Official School Portal & Management System</title>
   
   <!-- Tailwind CSS CDN -->
@@ -669,7 +672,7 @@
               </div>
               <div class="pt-2 border-t border-emerald-200/80 flex flex-wrap items-center justify-between gap-3">
                 <span class="text-slate-600">Want an instant response from the counselor?</span>
-                <a id="inquiryWhatsAppBtn" href="#" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm inline-flex items-center gap-2 transition text-xs">
+                <a id="inquiryWhatsAppBtn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm inline-flex items-center gap-2 transition text-xs">
                   <span>💬</span> Chat with Admission Desk on WhatsApp
                 </a>
               </div>
@@ -678,7 +681,7 @@
             <!-- Direct Instant Contact Options -->
             <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
               <span class="text-slate-500 font-medium">Prefer direct messaging?</span>
-              <a href="https://wa.me/919876543210?text=Hello%20CBSN-S%20Admissions%2C%20I%20would%20like%20to%20inquire%20about%20school%20admissions." target="_blank" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-sm flex items-center gap-2 transition">
+              <a href="https://wa.me/919876543210?text=Hello%20CBSN-S%20Admissions%2C%20I%20would%20like%20to%20inquire%20about%20school%20admissions." target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-sm flex items-center gap-2 transition">
                 <span>💬</span> Connect via WhatsApp (+91 98765 43210)
               </a>
             </div>
@@ -940,7 +943,7 @@
             </div>
             
             <div class="text-right">
-              <span class="text-[11px] text-brand-600 hover:underline cursor-pointer" onclick="showToast('Demo Credentials', 'Default Roll: CBSN-101 or CBSN-102 | Password: password123', '🔑')">Need login assistance?</span>
+              <span class="text-[11px] text-slate-500">Use the password provided by the school office.</span>
             </div>
 
             <button type="submit" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md shadow-brand-700/20">
@@ -1090,15 +1093,11 @@
           <form onsubmit="handleAdminLogin(event)" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Admin Email / Username *</label>
-              <input type="text" id="adminEmailInput" required value="admin@cbsns.edu" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-400" />
+              <input type="text" id="adminEmailInput" required placeholder="Admin username or email" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-400" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Master Password *</label>
-              <input type="password" id="adminPassInput" required value="admin123" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-400" />
-            </div>
-
-            <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-400 leading-normal">
-              Demo Access: <strong>admin@cbsns.edu</strong> / <strong>admin123</strong>
+              <input type="password" id="adminPassInput" required placeholder="Enter admin password" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-accent-400" />
             </div>
 
             <button type="submit" class="w-full py-3 bg-accent-500 hover:bg-accent-600 text-brand-950 font-bold text-xs sm:text-sm rounded-xl transition shadow-lg shadow-accent-500/20">
@@ -1902,14 +1901,14 @@
         name: "Aarav Sharma",
         class: "Class 10",
         email: "aarav.parent@example.com",
-        password: "password123"
+        passwordHash: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
       },
       {
         roll: "CBSN-102",
         name: "Diya Patel",
         class: "Class 8",
         email: "diya.parent@example.com",
-        password: "password123"
+        passwordHash: "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
       }
     ];
 
@@ -1979,7 +1978,7 @@
         branch: "main",
         folder: "gallery"
       },
-      googleSheetUrl: ""
+      googleSheetUrl: "https://script.google.com/macros/s/AKfycbxrrBWiVbGF7FNuKD77aw1bbdoE4r0Bd2NJ8-4gB1Q2_VhGmKKUNg8XbQh9LNNS1NRv/exec"
     };
 
     let toastTimeout;
@@ -2006,6 +2005,7 @@
         view.classList.add('hidden');
       });
 
+      if (pageId === 'view-admin-dashboard' && !isAdmin()) { showToast('Access Denied', 'Admin authentication required.', '🔒'); return; }
       const target = document.getElementById(pageId);
       if (target) {
         target.classList.remove('hidden');
@@ -2052,11 +2052,11 @@
         <div class="py-3.5 flex items-start justify-between gap-3 group cursor-pointer" onclick="navigateTo('view-notices')">
           <div>
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800">${n.category}</span>
-              <span class="text-[11px] text-slate-400">📅 ${n.date}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800">${escapeHtml(n.category)}</span>
+              <span class="text-[11px] text-slate-400">📅 ${escapeHtml(n.date)}</span>
             </div>
-            <h4 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-600 transition mt-1">${n.title}</h4>
-            <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">${n.desc}</p>
+            <h4 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-brand-600 transition mt-1">${escapeHtml(n.title)}</h4>
+            <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">${escapeHtml(n.desc)}</p>
           </div>
           <span class="text-xs text-brand-600 font-bold shrink-0 mt-1">Read →</span>
         </div>
@@ -2076,18 +2076,18 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2 hover:border-brand-300 transition">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded bg-brand-100 text-brand-800 text-[10px] font-bold uppercase tracking-wider">${item.category}</span>
-              <span class="text-xs text-slate-400 font-medium">📅 ${item.date}</span>
+              <span class="px-2.5 py-0.5 rounded bg-brand-100 text-brand-800 text-[10px] font-bold uppercase tracking-wider">${escapeHtml(item.category)}</span>
+              <span class="text-xs text-slate-400 font-medium">📅 ${escapeHtml(item.date)}</span>
             </div>
             ${item.fileUrl ? `
-              <a href="${item.fileUrl}" target="_blank" class="px-3 py-1 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold text-xs rounded-lg transition flex items-center gap-1">
+              <a href="${escapeHtml(sanitizeUrl(item.fileUrl))}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold text-xs rounded-lg transition flex items-center gap-1">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Download Document
               </a>
             ` : ''}
           </div>
-          <h3 class="text-base font-bold text-slate-900">${item.title}</h3>
-          <p class="text-xs text-slate-600 leading-relaxed">${item.desc}</p>
+          <h3 class="text-base font-bold text-slate-900">${escapeHtml(item.title)}</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(item.desc)}</p>
         </div>
       `).join('');
     }
@@ -2122,21 +2122,21 @@
       container.innerHTML = state.events.map(ev => `
         <div class="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-md hover:shadow-xl transition flex flex-col group">
           <div class="aspect-[16/9] bg-slate-900 overflow-hidden relative">
-            <img src="${ev.bannerUrl}" alt="${ev.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/800x450/003366/ffffff?text=${encodeURIComponent(ev.title)}'"/>
+            <img src="${escapeHtml(sanitizeUrl(ev.bannerUrl))}" alt="${escapeHtml(ev.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/800x450/003366/ffffff?text=${encodeURIComponent(ev.title)}'"/>
             <div class="absolute top-3 right-3 bg-brand-950/80 backdrop-blur-sm text-accent-400 font-extrabold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider border border-white/10">
-              ${ev.category}
+              ${escapeHtml(ev.category)}
             </div>
             <div class="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm text-slate-900 font-bold px-3 py-1 rounded-xl text-xs flex items-center gap-1.5 shadow-sm">
-              <span>📅</span> ${ev.date}
+              <span>📅</span> ${escapeHtml(ev.date)}
             </div>
           </div>
           <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
             <div class="space-y-2">
               <div class="text-[11px] font-semibold text-brand-700 flex items-center gap-1">
-                📍 <span>${ev.venue}</span>
+                📍 <span>${escapeHtml(ev.venue)}</span>
               </div>
-              <h3 class="font-extrabold text-slate-900 text-base group-hover:text-brand-600 transition leading-snug">${ev.title}</h3>
-              <p class="text-xs text-slate-600 leading-relaxed">${ev.desc}</p>
+              <h3 class="font-extrabold text-slate-900 text-base group-hover:text-brand-600 transition leading-snug">${escapeHtml(ev.title)}</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(ev.desc)}</p>
             </div>
             <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
               <button onclick="navigateTo('view-inquiry')" class="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1">
@@ -2148,7 +2148,130 @@
       `).join('');
     }
 
+    /* ========================= SECURITY + DATA INTEGRITY HELPERS ========================= */
+    const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+    const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+    const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg','image/png','image/webp','image/gif','image/svg+xml']);
+    const ALLOWED_DOCUMENT_EXT = /\.(pdf|png|jpe?g|doc)$/i;
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
+
+    function sanitizeUrl(value) {
+      const url = String(value || '').trim();
+      if (!url) return '';
+      try {
+        const parsed = new URL(url, window.location.href);
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
+      } catch (_) {}
+      return '';
+    }
+
+    function isAdmin() {
+      return state.currentUser?.type === 'admin' && Boolean(sessionStorage.getItem('cbsn_admin_session'));
+    }
+
+    function requireAdmin(action = 'perform this action') {
+      if (isAdmin()) return true;
+      showToast('Access Denied', `Admin login required to ${action}.`, '🔒');
+      return false;
+    }
+
+    function validateUploadFile(file, kind = 'image') {
+      if (!file) throw new Error('No file selected.');
+      if (kind === 'image') {
+        if (!ALLOWED_IMAGE_TYPES.has(file.type)) throw new Error('Only JPG, PNG, WEBP, GIF or SVG images are allowed.');
+        if (file.size > MAX_IMAGE_BYTES) throw new Error('Image size must be 10 MB or less.');
+      } else {
+        const safeName = String(file.name || '');
+        if (!ALLOWED_DOCUMENT_EXT.test(safeName)) throw new Error('Unsupported document type.');
+        if (file.size > MAX_DOCUMENT_BYTES) throw new Error('Document size must be 10 MB or less.');
+      }
+    }
+
+    function githubApiUrl(path, branch = '') {
+      const config = state.githubConfig;
+      const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+      const base = `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/${encodedPath}`;
+      return branch ? `${base}?ref=${encodeURIComponent(branch)}` : base;
+    }
+
+    function githubHeaders(includeJson = false) {
+      const headers = {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+      if (state.githubConfig.token) headers.Authorization = `Bearer ${state.githubConfig.token}`;
+      if (includeJson) headers['Content-Type'] = 'application/json';
+      return headers;
+    }
+
+    function normalizeGithubImage(file, folder) {
+      const rawUrl = sanitizeUrl(file.download_url || `https://raw.githubusercontent.com/${state.githubConfig.owner}/${state.githubConfig.repo}/${encodeURIComponent(state.githubConfig.branch || 'main')}/${file.path}`);
+      const baseTitle = String(file.name || '').replace(/^\d+_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+      return {
+        id: `gh-${file.sha || crypto.randomUUID()}`,
+        title: escapeHtml(decodeURIComponent(baseTitle)),
+        category: folder === 'events' ? 'Campus' : 'Campus',
+        date: new Date().toISOString().split('T')[0],
+        url: rawUrl,
+        githubPath: file.path,
+        githubSha: file.sha,
+        source: 'github'
+      };
+    }
+
+    async function fileToBase64(file) {
+      const buffer = await file.arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const CHUNK = 0x8000;
+      for (let i = 0; i < bytes.length; i += CHUNK) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+      }
+      return btoa(binary);
+    }
+
+    async function deleteFileFromGitHub(item) {
+      if (!item?.githubPath || !state.githubConfig.token || !state.githubConfig.owner || !state.githubConfig.repo) return false;
+      let sha = item.githubSha;
+      if (!sha) {
+        const getRes = await fetch(githubApiUrl(item.githubPath, state.githubConfig.branch || 'main'), { headers: githubHeaders() });
+        if (!getRes.ok) throw new Error(`Unable to locate GitHub file (${getRes.status}).`);
+        const data = await getRes.json();
+        sha = data.sha;
+      }
+      const res = await fetch(githubApiUrl(item.githubPath), {
+        method: 'DELETE',
+        headers: githubHeaders(true),
+        body: JSON.stringify({
+          message: `CBSN-S Delete: ${item.githubPath}`,
+          sha,
+          branch: state.githubConfig.branch || 'main'
+        })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || `GitHub delete failed (${res.status}).`);
+      }
+      return true;
+    }
+
+    function validateStateShape() {
+      const arrayKeys = ['gallery','events','notices','inquiries','admitCards','results','students'];
+      for (const key of arrayKeys) if (!Array.isArray(state[key])) state[key] = [];
+      state.githubConfig = {
+        token: state.githubConfig?.token || '',
+        owner: state.githubConfig?.owner || '',
+        repo: state.githubConfig?.repo || '',
+        branch: state.githubConfig?.branch || 'main',
+        folder: state.githubConfig?.folder || 'gallery'
+      };
+    }
+
     async function handleAdminCreateEventBanner(e) {
+      if (!requireAdmin('manage this record')) return;
       e.preventDefault();
       const title = document.getElementById('newEventTitle').value.trim();
       const date = document.getElementById('newEventDate').value;
@@ -2164,7 +2287,7 @@
 
       const btn = document.getElementById('btnPublishEventBanner');
       btn.innerText = "Committing to GitHub...";
-      const uploadedBannerUrl = await uploadFileToGitHub(fileInput.files[0], "events");
+      const uploadedBanner = await uploadFileToGitHub(fileInput.files[0], "events");
       btn.innerText = "Upload Banner to GitHub & Publish";
 
       const eventObj = {
@@ -2174,10 +2297,11 @@
         category,
         venue,
         desc,
-        bannerUrl: uploadedBannerUrl
+        bannerUrl: uploadedBanner.url, githubPath: uploadedBanner.path, githubSha: uploadedBanner.sha, source: 'github'
       };
 
       state.events.unshift(eventObj);
+      saveStateToLocalStorage();
       renderAdminEventList();
       renderUpcomingEventsBanner();
       syncToGoogleSheet('EVENT_BANNER_UPLOAD', eventObj);
@@ -2200,11 +2324,11 @@
       container.innerHTML = state.events.map(ev => `
         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-4 items-start justify-between text-xs">
           <div class="flex gap-3 items-start">
-            <img src="${ev.bannerUrl}" class="w-24 h-16 object-cover rounded-xl shrink-0" onerror="this.src='https://placehold.co/100x60?text=Banner'"/>
+            <img src="${escapeHtml(sanitizeUrl(ev.bannerUrl))}" class="w-24 h-16 object-cover rounded-xl shrink-0" onerror="this.src='https://placehold.co/100x60?text=Banner'"/>
             <div>
-              <div class="font-bold text-slate-900">${ev.title}</div>
-              <div class="text-slate-500 text-[11px] mt-0.5">📅 ${ev.date} • ${ev.category} • ${ev.venue}</div>
-              <p class="text-slate-600 text-[11px] line-clamp-1 mt-1">${ev.desc}</p>
+              <div class="font-bold text-slate-900">${escapeHtml(ev.title)}</div>
+              <div class="text-slate-500 text-[11px] mt-0.5">📅 ${escapeHtml(ev.date)} • ${escapeHtml(ev.category)} • ${escapeHtml(ev.venue)}</div>
+              <p class="text-slate-600 text-[11px] line-clamp-1 mt-1">${escapeHtml(ev.desc)}</p>
             </div>
           </div>
           <button onclick="deleteEventBanner('${ev.id}')" class="text-red-500 hover:text-red-700 font-bold px-2.5 py-1 bg-white rounded-lg border border-slate-200 shrink-0">
@@ -2214,7 +2338,11 @@
       `).join('');
     }
 
-    function deleteEventBanner(id) {
+    async function deleteEventBanner(id) {
+      if (!requireAdmin('delete this event')) return;
+      const item = state.events.find(e => e.id === id);
+      if (!item) return;
+      try { if (item.githubPath) await deleteFileFromGitHub(item); } catch (err) { showToast('Delete Failed', err.message, '⛔'); return; }
       state.events = state.events.filter(e => e.id !== id);
       saveStateToLocalStorage();
       renderAdminEventList();
@@ -2223,6 +2351,7 @@
     }
 
     async function handleAdminUploadPhoto(e) {
+      if (!requireAdmin('manage this record')) return;
       e.preventDefault();
       const caption = document.getElementById('newPhotoCaption').value.trim();
       const category = document.getElementById('newPhotoCategory').value;
@@ -2241,14 +2370,17 @@
 
       try {
         const file = fileInput.files[0];
-        const uploadedUrl = await uploadFileToGitHub(file, "gallery");
+        const uploaded = await uploadFileToGitHub(file, "gallery");
 
         const photoObj = {
           id: "gal-" + Date.now(),
           title: caption,
           category: category,
           date: date,
-          url: uploadedUrl
+          url: uploaded.url,
+          githubPath: uploaded.path,
+          githubSha: uploaded.sha,
+          source: 'github'
         };
 
         state.gallery.unshift(photoObj);
@@ -2268,6 +2400,7 @@
     }
 
     function handleSaveGitHubSettings(e) {
+      if (!requireAdmin('manage this record')) return;
       e.preventDefault();
       const token = document.getElementById('ghTokenInput').value.trim();
       const owner = document.getElementById('ghOwnerInput').value.trim() || 'contactcbsnu-lang';
@@ -2276,12 +2409,13 @@
       const folder = document.getElementById('ghFolderInput').value.trim() || 'gallery';
 
       state.githubConfig = { token, owner, repo, branch, folder };
-      localStorage.setItem('cbsn_gh_config', JSON.stringify(state.githubConfig));
+      localStorage.setItem('cbsn_gh_config', JSON.stringify({ owner, repo, branch, folder }));
       showToast("Settings Saved", "GitHub connection successfully saved and stored!", "🐙");
       testGitHubConnection();
     }
 
     async function handleAdminCreateNotice(e) {
+      if (!requireAdmin('manage this record')) return;
       e.preventDefault();
       const title = document.getElementById('newNoticeTitle').value.trim();
       const category = document.getElementById('newNoticeCategory').value;
@@ -2296,7 +2430,7 @@
 
       if (fileInput.files && fileInput.files.length > 0) {
         btn.innerText = "Committing Document to GitHub...";
-        fileUrl = await uploadFileToGitHub(fileInput.files[0], "notices");
+        fileUrl = (await uploadFileToGitHub(fileInput.files[0], "notices")).url;
       }
 
       const noticeObj = {
@@ -2322,6 +2456,7 @@
     }
 
     function handleAdminCreateAdmitCard(e) {
+      if (!requireAdmin('manage this record')) return;
       e.preventDefault();
       const roll = document.getElementById('admitFormRoll').value.trim().toUpperCase();
       const sClass = document.getElementById('admitFormClass').value;
@@ -2355,6 +2490,7 @@
     }
 
     function handleAdminCreateResult(e) {
+      if (!requireAdmin('manage this record')) return;
       e.preventDefault();
       const roll = document.getElementById('resFormRoll').value.trim().toUpperCase();
       const term = document.getElementById('resFormTerm').value;
@@ -2368,6 +2504,9 @@
       const sst = parseInt(document.getElementById('resScoreSst').value) || 0;
       const lang = parseInt(document.getElementById('resScoreLang').value) || 0;
       const ai = parseInt(document.getElementById('resScoreAi').value) || 0;
+
+      const scoreSet = [eng, math, sci, sst, lang, ai];
+      if (scoreSet.some(v => !Number.isInteger(v) || v < 0 || v > 100)) { showToast('Invalid Marks', 'Every subject score must be between 0 and 100.', '⚠️'); return; }
 
       const totalMarks = eng + math + sci + sst + lang + ai;
       const maxMarks = 600;
@@ -2412,22 +2551,27 @@
     }
 
     async function syncToGoogleSheet(action, payload) {
-      if (!state.googleSheetUrl) return;
+      const endpoint = String(state.googleSheetUrl || '').trim();
+      if (!endpoint) return { ok: false, skipped: true };
       try {
-        await fetch(state.googleSheetUrl, {
+        const url = new URL(endpoint);
+        if (url.protocol !== 'https:') throw new Error('Google Sheets endpoint must use HTTPS.');
+        const res = await fetch(url.href, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
-            action: action,
+            action,
             roll: payload?.roll || '',
             name: payload?.name || payload?.studentName || '',
             class: payload?.class || payload?.grade || '',
-            payload: payload
+            payload
           })
         });
+        return { ok: res.ok, status: res.status };
       } catch (err) {
-        console.warn("Google Sheet sync notice:", err);
+        console.warn('Google Sheet sync notice:', err);
+        showToast('Sheet Sync Failed', err.message || 'Could not synchronize with Google Sheets.', '⚠️');
+        return { ok: false, error: err.message };
       }
     }
 
@@ -2448,7 +2592,7 @@
     function loadStateFromLocalStorage() {
       try {
         const ghConfig = localStorage.getItem('cbsn_gh_config');
-        if (ghConfig) state.githubConfig = JSON.parse(ghConfig);
+        if (ghConfig) { const saved = JSON.parse(ghConfig); state.githubConfig = { ...state.githubConfig, owner: saved.owner || '', repo: saved.repo || '', branch: saved.branch || 'main', folder: saved.folder || 'gallery', token: '' }; }
 
         const sheetUrl = localStorage.getItem('cbsn_sheet_url');
         if (sheetUrl) state.googleSheetUrl = sheetUrl;
@@ -2473,8 +2617,10 @@
 
         const students = localStorage.getItem('cbsn_students');
         if (students) state.students = JSON.parse(students);
+        validateStateShape();
       } catch (e) {
         console.warn("Could not load from localStorage:", e);
+        validateStateShape();
       }
     }
 
@@ -2506,6 +2652,7 @@
       };
 
       state.inquiries.unshift(inquiryObj);
+      saveStateToLocalStorage();
       syncToGoogleSheet('INQUIRY_SUBMIT', inquiryObj);
 
       const refEl = document.getElementById('inquiryRefId');
@@ -2543,20 +2690,20 @@
         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
             <div class="flex items-center gap-2">
-              <span class="font-mono font-bold text-brand-900 bg-brand-100 px-2.5 py-0.5 rounded text-[11px]">${inq.refId}</span>
-              <span class="font-bold text-slate-800">${inq.parentName}</span>
-              <span class="text-slate-400">| Student: <strong>${inq.studentName}</strong> (${inq.grade})</span>
+              <span class="font-mono font-bold text-brand-900 bg-brand-100 px-2.5 py-0.5 rounded text-[11px]">${escapeHtml(inq.refId)}</span>
+              <span class="font-bold text-slate-800">${escapeHtml(inq.parentName)}</span>
+              <span class="text-slate-400">| Student: <strong>${escapeHtml(inq.studentName)}</strong> (${escapeHtml(inq.grade)})</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded">${inq.category}</span>
-              <span class="text-[10px] text-slate-400">📅 ${inq.date}</span>
+              <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded">${escapeHtml(inq.category)}</span>
+              <span class="text-[10px] text-slate-400">📅 ${escapeHtml(inq.date)}</span>
             </div>
           </div>
           <div class="grid sm:grid-cols-2 gap-2 text-slate-600 text-[11px]">
-            <div><strong>📞 Phone:</strong> <a href="tel:${inq.phone}" class="text-brand-600 font-semibold hover:underline">${inq.phone}</a></div>
-            <div><strong>✉️ Email:</strong> <a href="mailto:${inq.email}" class="text-brand-600 font-semibold hover:underline">${inq.email}</a></div>
+            <div><strong>📞 Phone:</strong> <a href="tel:${escapeHtml(inq.phone)}" class="text-brand-600 font-semibold hover:underline">${escapeHtml(inq.phone)}</a></div>
+            <div><strong>✉️ Email:</strong> <a href="mailto:${escapeHtml(inq.email)}" class="text-brand-600 font-semibold hover:underline">${escapeHtml(inq.email)}</a></div>
           </div>
-          ${inq.message ? `<div class="p-2.5 bg-white rounded-xl border border-slate-200 text-slate-700 text-[11px]">"${inq.message}"</div>` : ''}
+          ${inq.message ? `<div class="p-2.5 bg-white rounded-xl border border-slate-200 text-slate-700 text-[11px]">"${escapeHtml(inq.message)}"</div>` : ''}
           <div class="flex justify-end pt-1">
             <button onclick="deleteInquiry('${inq.id}')" class="text-red-500 hover:text-red-700 text-[11px] font-bold">
               Dismiss Inquiry ✕
@@ -2567,6 +2714,7 @@
     }
 
     function deleteInquiry(id) {
+      if (!requireAdmin('delete this inquiry')) return;
       state.inquiries = state.inquiries.filter(i => i.id !== id);
       saveStateToLocalStorage();
       renderAdminInquiryList();
@@ -2585,14 +2733,14 @@
       }
 
       container.innerHTML = filtered.map(item => `
-        <div class="group relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm hover:shadow-lg transition cursor-pointer" onclick="openLightbox('${item.url}', '${escapeQuotes(item.title)}', '${item.category}')">
+        <div class="group relative rounded-2xl overflow-hidden bg-slate-100 shadow-sm hover:shadow-lg transition cursor-pointer" onclick="openLightbox('${item.url}', '${escapeQuotes(item.title)}', '${escapeHtml(item.category)}')">
           <div class="aspect-square overflow-hidden bg-slate-800">
-            <img src="${item.url}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x600/003366/ffffff?text=${encodeURIComponent(item.title)}'"/>
+            <img src="${item.url}" alt="${escapeHtml(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x600/003366/ffffff?text=${encodeURIComponent(item.title)}'"/>
           </div>
           <div class="p-3 bg-white">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${item.category}</span>
-            <h4 class="font-bold text-slate-800 text-xs mt-1.5 truncate">${item.title}</h4>
-            <div class="text-[10px] text-slate-400 mt-0.5">📅 ${item.date}</div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${escapeHtml(item.category)}</span>
+            <h4 class="font-bold text-slate-800 text-xs mt-1.5 truncate">${escapeHtml(item.title)}</h4>
+            <div class="text-[10px] text-slate-400 mt-0.5">📅 ${escapeHtml(item.date)}</div>
           </div>
         </div>
       `).join('');
@@ -2651,7 +2799,7 @@
       const roll = document.getElementById('admitRollInput').value.trim().toUpperCase();
       const sClass = document.getElementById('admitClassInput').value;
 
-      const card = state.admitCards.find(c => c.roll.toUpperCase() === roll && c.class === sClass);
+      const card = state.admitCards.find(c => String(c.roll || '').toUpperCase() === roll && c.class === sClass);
       const resContainer = document.getElementById('admitCardResultCard');
 
       if (!card) {
@@ -2665,7 +2813,7 @@
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
             <div>
               <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Verified Hall Ticket</span>
-              <h3 class="text-base font-bold text-slate-900 mt-1">${card.name} (${card.roll})</h3>
+              <h3 class="text-base font-bold text-slate-900 mt-1">${escapeHtml(card.name)} (${escapeHtml(card.roll)})</h3>
             </div>
             <button onclick="printOfficialAdmitCard('${card.id}')" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -2673,16 +2821,16 @@
             </button>
           </div>
           <div class="grid sm:grid-cols-2 gap-2 text-xs text-slate-700">
-            <div><strong>Exam:</strong> ${card.examName}</div>
-            <div><strong>Class:</strong> ${card.class}</div>
-            <div><strong>Exam Center:</strong> ${card.center}</div>
-            <div><strong>Timings:</strong> ${card.timing}</div>
-            <div class="sm:col-span-2"><strong>Permitted Subjects:</strong> ${card.subjects}</div>
+            <div><strong>Exam:</strong> ${escapeHtml(card.examName)}</div>
+            <div><strong>Class:</strong> ${escapeHtml(card.class)}</div>
+            <div><strong>Exam Center:</strong> ${escapeHtml(card.center)}</div>
+            <div><strong>Timings:</strong> ${escapeHtml(card.timing)}</div>
+            <div class="sm:col-span-2"><strong>Permitted Subjects:</strong> ${escapeHtml(card.subjects)}</div>
           </div>
         </div>
       `;
       resContainer.classList.remove('hidden');
-      showToast("Admit Card Found", `Ready to print for ${card.name}.`, "🎫");
+      showToast("Admit Card Found", `Ready to print for ${escapeHtml(card.name)}.`, "🎫");
     }
 
     function handleSearchResult(e) {
@@ -2690,7 +2838,7 @@
       const roll = document.getElementById('resultRollInput').value.trim().toUpperCase();
       const term = document.getElementById('resultTermInput').value;
 
-      const res = state.results.find(r => r.roll.toUpperCase() === roll && r.term === term);
+      const res = state.results.find(r => String(r.roll || '').toUpperCase() === roll && r.term === term);
       const resContainer = document.getElementById('marksheetResultCard');
 
       if (!res) {
@@ -2703,8 +2851,8 @@
         <div class="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-300 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
             <div>
-              <span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">${res.grade}</span>
-              <h3 class="text-base font-bold text-slate-900 mt-1">${res.name} (${res.roll}) - Score: ${res.percentage}</h3>
+              <span class="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">${escapeHtml(res.grade)}</span>
+              <h3 class="text-base font-bold text-slate-900 mt-1">${escapeHtml(res.name)} (${escapeHtml(res.roll)}) - Score: ${escapeHtml(res.percentage)}</h3>
             </div>
             <button onclick="printOfficialMarksheet('${res.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-brand-950 font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -2712,12 +2860,12 @@
             </button>
           </div>
           <div class="text-xs text-slate-700">
-            <strong>Term:</strong> ${res.term} | <strong>Class:</strong> ${res.class} | <strong>Total Marks:</strong> ${res.totalMarks} / ${res.maxMarks}
+            <strong>Term:</strong> ${escapeHtml(res.term)} | <strong>Class:</strong> ${escapeHtml(res.class)} | <strong>Total Marks:</strong> ${escapeHtml(res.totalMarks)} / ${escapeHtml(res.maxMarks)}
           </div>
         </div>
       `;
       resContainer.classList.remove('hidden');
-      showToast("Result Retrieved", `${res.name} achieved ${res.percentage} (${res.grade}).`, "📊");
+      showToast("Result Retrieved", `${escapeHtml(res.name)} achieved ${escapeHtml(res.percentage)} (${escapeHtml(res.grade)}).`, "📊");
     }
 
     function printOfficialAdmitCard(cardId) {
@@ -2734,21 +2882,21 @@
           </div>
           <table style="width: 100%; font-size: 12px; margin-bottom: 15px; border-collapse: collapse;">
             <tr>
-              <td style="padding: 6px 0;"><strong>Candidate Name:</strong> ${card.name}</td>
-              <td style="padding: 6px 0;"><strong>Roll Number:</strong> ${card.roll}</td>
+              <td style="padding: 6px 0;"><strong>Candidate Name:</strong> ${escapeHtml(card.name)}</td>
+              <td style="padding: 6px 0;"><strong>Roll Number:</strong> ${escapeHtml(card.roll)}</td>
             </tr>
             <tr>
-              <td style="padding: 6px 0;"><strong>Class / Section:</strong> ${card.class}</td>
-              <td style="padding: 6px 0;"><strong>Examination:</strong> ${card.examName}</td>
+              <td style="padding: 6px 0;"><strong>Class / Section:</strong> ${escapeHtml(card.class)}</td>
+              <td style="padding: 6px 0;"><strong>Examination:</strong> ${escapeHtml(card.examName)}</td>
             </tr>
             <tr>
-              <td style="padding: 6px 0;"><strong>Exam Center:</strong> ${card.center}</td>
-              <td style="padding: 6px 0;"><strong>Reporting Time:</strong> ${card.timing}</td>
+              <td style="padding: 6px 0;"><strong>Exam Center:</strong> ${escapeHtml(card.center)}</td>
+              <td style="padding: 6px 0;"><strong>Reporting Time:</strong> ${escapeHtml(card.timing)}</td>
             </tr>
           </table>
           <div style="margin-bottom: 15px;">
             <strong style="font-size: 12px; display: block; margin-bottom: 5px;">Registered Subjects:</strong>
-            <div style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-size: 11px;">${card.subjects}</div>
+            <div style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9; font-size: 11px;">${escapeHtml(card.subjects)}</div>
           </div>
           <div style="border-top: 1px solid #ccc; padding-top: 25px; margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px;">
             <div style="text-align: center;"><div style="border-top: 1px dashed #444; width: 150px; padding-top: 4px;">Candidate Signature</div></div>
@@ -2765,9 +2913,9 @@
 
       const scoresRows = Object.entries(res.scores).map(([sub, mark]) => `
         <tr>
-          <td style="padding: 6px; border: 1px solid #ddd;">${sub}</td>
+          <td style="padding: 6px; border: 1px solid #ddd;">${escapeHtml(sub)}</td>
           <td style="padding: 6px; border: 1px solid #ddd; text-align: center;">100</td>
-          <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${mark}</td>
+          <td style="padding: 6px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${escapeHtml(mark)}</td>
         </tr>
       `).join('');
 
@@ -2777,17 +2925,17 @@
           <div style="text-align: center; border-bottom: 2px solid #003366; padding-bottom: 12px; margin-bottom: 15px;">
             <h1 style="color: #003366; margin: 0; font-size: 24px; font-weight: 800;">CBSN-S SCHOOL OF EXCELLENCE</h1>
             <p style="font-size: 11px; margin: 3px 0 0; color: #555;">STATEMENT OF MARKS & EVALUATION REPORT</p>
-            <h2 style="font-size: 14px; margin-top: 8px; color: #003366;">${res.term}</h2>
+            <h2 style="font-size: 14px; margin-top: 8px; color: #003366;">${escapeHtml(res.term)}</h2>
           </div>
           <table style="width: 100%; font-size: 12px; margin-bottom: 15px;">
-            <tr><td><strong>Student Name:</strong> ${res.name}</td><td><strong>Roll No:</strong> ${res.roll}</td></tr>
-            <tr><td><strong>Class:</strong> ${res.class}</td><td><strong>Grade:</strong> ${res.grade}</td></tr>
+            <tr><td><strong>Student Name:</strong> ${escapeHtml(res.name)}</td><td><strong>Roll No:</strong> ${escapeHtml(res.roll)}</td></tr>
+            <tr><td><strong>Class:</strong> ${escapeHtml(res.class)}</td><td><strong>Grade:</strong> ${escapeHtml(res.grade)}</td></tr>
           </table>
           <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px;">
             <thead><tr style="background: #f0f7ff;"><th style="padding: 6px; border: 1px solid #ddd; text-align: left;">Subject</th><th style="padding: 6px; border: 1px solid #ddd;">Max Marks</th><th style="padding: 6px; border: 1px solid #ddd;">Marks Obtained</th></tr></thead>
             <tbody>${scoresRows}</tbody>
           </table>
-          <div style="font-size: 12px; margin-bottom: 15px;"><strong>Remarks:</strong> <em>"${res.remarks}"</em></div>
+          <div style="font-size: 12px; margin-bottom: 15px;"><strong>Remarks:</strong> <em>"${escapeHtml(res.remarks)}"</em></div>
           <div style="border-top: 1px solid #ccc; padding-top: 25px; margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px;">
             <div style="text-align: center;"><div style="border-top: 1px dashed #444; width: 140px; padding-top: 4px;">Class Teacher</div></div>
             <div style="text-align: center;"><div style="border-top: 1px dashed #444; width: 140px; padding-top: 4px;">Principal Signature</div></div>
@@ -2820,63 +2968,85 @@
       }
     }
 
-    function handleStudentLogin(e) {
+    async function sha256Hex(value) {
+      if (!window.crypto?.subtle) {
+        throw new Error('Secure cryptography is unavailable in this browser/context. Please use HTTPS or localhost.');
+      }
+      const data = new TextEncoder().encode(String(value ?? ''));
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    async function handleStudentLogin(e) {
       e.preventDefault();
       const roll = document.getElementById('studentLoginRoll').value.trim().toUpperCase();
       const pass = document.getElementById('studentLoginPass').value;
-
-      const student = state.students.find(s => s.roll.toUpperCase() === roll && s.password === pass);
+      if (!pass) { showToast('Authentication Failed', 'Password is required.', '⛔'); return; }
+      const passHash = await sha256Hex(pass);
+      const student = state.students.find(s => String(s.roll || '').toUpperCase() === roll && (s.passwordHash === passHash || s.password === pass));
       if (!student) {
         showToast("Authentication Failed", "Invalid Roll Number or Password.", "⛔");
         return;
       }
-
+      if (!student.passwordHash) {
+        student.passwordHash = passHash;
+        delete student.password;
+        saveStateToLocalStorage();
+      }
       state.currentUser = { type: 'student', roll: student.roll, name: student.name, class: student.class };
       updateNavAuthUI();
       navigateTo('view-student-dashboard');
       showToast("Welcome Back", `Signed in as ${student.name}.`, "🎓");
     }
 
-    function handleStudentSignup(e) {
+    async function handleStudentSignup(e) {
       e.preventDefault();
       const name = document.getElementById('studentRegName').value.trim();
       const roll = document.getElementById('studentRegRoll').value.trim().toUpperCase();
       const sClass = document.getElementById('studentRegClass').value;
       const email = document.getElementById('studentRegEmail').value.trim();
       const password = document.getElementById('studentRegPass').value;
-
-      if (state.students.find(s => s.roll === roll)) {
+      if (state.students.find(s => String(s.roll || '').toUpperCase() === roll)) {
         showToast("Registration Error", "Student with this roll number already exists.", "⚠️");
         return;
       }
-
-      const newStudent = { name, roll, class: sClass, email, password };
+      if (password.length < 8) { showToast('Registration Error', 'Password must be at least 8 characters.', '⚠️'); return; }
+      const passwordHash = await sha256Hex(password);
+      const newStudent = { name, roll, class: sClass, email, passwordHash };
       state.students.push(newStudent);
-      syncToGoogleSheet('STUDENT_REGISTRATION', newStudent);
-
+      saveStateToLocalStorage();
+      syncToGoogleSheet('STUDENT_REGISTRATION', { name, roll, class: sClass, email });
       state.currentUser = { type: 'student', roll, name, class: sClass };
       updateNavAuthUI();
       navigateTo('view-student-dashboard');
       showToast("Registration Success", `Welcome to CBSN-S, ${name}!`, "🎉");
     }
 
-    function handleAdminLogin(e) {
+    async function handleAdminLogin(e) {
       e.preventDefault();
-      const email = document.getElementById('adminEmailInput').value.trim();
+      const email = document.getElementById('adminEmailInput').value.trim().toLowerCase();
       const pass = document.getElementById('adminPassInput').value;
-
-      if (email === 'admin@cbsns.edu' && pass === 'admin123') {
-        state.currentUser = { type: 'admin', name: "Admin Officer" };
+      const ADMIN_USERNAME = 'admin';
+      // Temporary client-only compatibility credential. Replace this with backend authentication for production.
+      const ADMIN_PASSWORD_SHA256 = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
+      const passHash = await sha256Hex(pass);
+      if (email === ADMIN_USERNAME && passHash === ADMIN_PASSWORD_SHA256) {
+        state.currentUser = { type: 'admin', name: 'Admin Officer' };
+        sessionStorage.setItem('cbsn_admin_session', crypto.randomUUID());
         updateNavAuthUI();
         navigateTo('view-admin-dashboard');
-        showToast("Admin Authenticated", "Logged into Administration Command Hub.", "🛡️");
+        showToast('Admin Authenticated', 'Logged into Administration Command Hub.', '🛡️');
       } else {
-        showToast("Access Denied", "Incorrect credentials for Admin Hub.", "⛔");
+        showToast('Access Denied', 'Incorrect credentials for Admin Hub.', '⛔');
       }
     }
 
     function handleLogout() {
       state.currentUser = null;
+      state.githubConfig.token = '';
+      sessionStorage.removeItem('cbsn_admin_session');
       updateNavAuthUI();
       navigateTo('view-home');
       showToast("Signed Out", "You have securely logged out.", "👋");
@@ -2914,7 +3084,7 @@
       const card = state.admitCards.find(c => c.roll.toUpperCase() === state.currentUser.roll.toUpperCase());
       const admitBox = document.getElementById('dashAdmitCardSummary');
       if (card) {
-        admitBox.innerHTML = `<div><strong>Exam:</strong> ${card.examName}</div><div><strong>Center:</strong> ${card.center}</div>`;
+        admitBox.innerHTML = `<div><strong>Exam:</strong> ${escapeHtml(card.examName)}</div><div><strong>Center:</strong> ${escapeHtml(card.center)}</div>`;
       } else {
         admitBox.innerHTML = `<span class="text-slate-400">No active admit card currently issued.</span>`;
       }
@@ -2922,7 +3092,7 @@
       const res = state.results.find(r => r.roll.toUpperCase() === state.currentUser.roll.toUpperCase());
       const resBox = document.getElementById('dashMarksheetSummary');
       if (res) {
-        resBox.innerHTML = `<div><strong>Term:</strong> ${res.term}</div><div><strong>Grade:</strong> ${res.grade} (${res.percentage})</div>`;
+        resBox.innerHTML = `<div><strong>Term:</strong> ${escapeHtml(res.term)}</div><div><strong>Grade:</strong> ${escapeHtml(res.grade)} (${escapeHtml(res.percentage)})</div>`;
       } else {
         resBox.innerHTML = `<span class="text-slate-400">No published report card yet.</span>`;
       }
@@ -3014,10 +3184,10 @@
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start justify-between gap-3 text-xs">
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-800">${item.title}</span>
-              <span class="px-1.5 py-0.5 bg-brand-100 text-brand-800 text-[10px] font-bold rounded">${item.category}</span>
+              <span class="font-bold text-slate-800">${escapeHtml(item.title)}</span>
+              <span class="px-1.5 py-0.5 bg-brand-100 text-brand-800 text-[10px] font-bold rounded">${escapeHtml(item.category)}</span>
             </div>
-            <p class="text-slate-500 text-[11px] mt-0.5">${item.desc}</p>
+            <p class="text-slate-500 text-[11px] mt-0.5">${escapeHtml(item.desc)}</p>
           </div>
           <button onclick="deleteNotice('${item.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1 bg-white rounded border border-slate-200">
             Delete
@@ -3026,7 +3196,11 @@
       `).join('');
     }
 
-    function deleteNotice(id) {
+    async function deleteNotice(id) {
+      if (!requireAdmin('delete this notice')) return;
+      const item = state.notices.find(n => n.id === id);
+      if (!item) return;
+      try { if (item.githubPath) await deleteFileFromGitHub(item); } catch (err) { showToast('Delete Failed', err.message, '⛔'); return; }
       state.notices = state.notices.filter(n => n.id !== id);
       saveStateToLocalStorage();
       renderAdminNotices();
@@ -3041,15 +3215,19 @@
 
       container.innerHTML = state.gallery.map(item => `
         <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 text-xs space-y-1 relative group">
-          <img src="${item.url}" class="h-20 w-full object-cover rounded-lg" onerror="this.src='https://placehold.co/100x100?text=Image'"/>
-          <p class="font-bold text-slate-800 truncate">${item.title}</p>
-          <span class="text-[10px] text-slate-400 block">${item.category}</span>
+          <img src="${escapeHtml(sanitizeUrl(item.url))}" class="h-20 w-full object-cover rounded-lg" onerror="this.src='https://placehold.co/100x100?text=Image'"/>
+          <p class="font-bold text-slate-800 truncate">${escapeHtml(item.title)}</p>
+          <span class="text-[10px] text-slate-400 block">${escapeHtml(item.category)}</span>
           <button onclick="deleteGalleryPhoto('${item.id}')" class="absolute top-3 right-3 bg-red-600 text-white rounded p-1 text-[10px] shadow">✕</button>
         </div>
       `).join('');
     }
 
-    function deleteGalleryPhoto(id) {
+    async function deleteGalleryPhoto(id) {
+      if (!requireAdmin('delete this photo')) return;
+      const item = state.gallery.find(g => g.id === id);
+      if (!item) return;
+      try { if (item.githubPath) await deleteFileFromGitHub(item); } catch (err) { showToast('Delete Failed', err.message, '⛔'); return; }
       state.gallery = state.gallery.filter(g => g.id !== id);
       saveStateToLocalStorage();
       renderAdminGalleryList();
@@ -3066,7 +3244,7 @@
       container.innerHTML = state.admitCards.map(item => `
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
           <div>
-            <div class="font-bold text-slate-900">${item.name} (${item.roll})</div>
+            <div class="font-bold text-slate-900">${escapeHtml(item.name)} (${escapeHtml(item.roll)})</div>
             <div class="text-slate-500 text-[11px]">${item.class} • ${item.examName}</div>
           </div>
           <div class="flex items-center gap-2">
@@ -3082,6 +3260,7 @@
     }
 
     function deleteAdmitCard(id) {
+      if (!requireAdmin('manage this record')) return;
       state.admitCards = state.admitCards.filter(a => a.id !== id);
       saveStateToLocalStorage();
       renderAdminAdmitList();
@@ -3097,7 +3276,7 @@
       container.innerHTML = state.results.map(item => `
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
           <div>
-            <div class="font-bold text-slate-900">${item.name} (${item.roll}) - ${item.percentage}</div>
+            <div class="font-bold text-slate-900">${escapeHtml(item.name)} (${escapeHtml(item.roll)}) - ${escapeHtml(item.percentage)}</div>
             <div class="text-slate-500 text-[11px]">${item.term} • Grade: ${item.grade}</div>
           </div>
           <div class="flex items-center gap-2">
@@ -3113,6 +3292,7 @@
     }
 
     function deleteResult(id) {
+      if (!requireAdmin('manage this record')) return;
       state.results = state.results.filter(r => r.id !== id);
       saveStateToLocalStorage();
       renderAdminResultList();
@@ -3120,126 +3300,109 @@
     }
 
     async function uploadFileToGitHub(file, folder = "gallery") {
+      if (!requireAdmin('upload files')) throw new Error('Admin authentication required.');
       const config = state.githubConfig;
+      if (!config.token || !config.owner || !config.repo) throw new Error('Configure GitHub connection before uploading.');
+      validateUploadFile(file, folder === 'gallery' || folder === 'events' ? 'image' : 'document');
 
-      if (!config.token || !config.owner || !config.repo) {
-        showToast("GitHub Token Missing", "Token daal kar 'Save GitHub Connection' karein, tabhi GitHub par save hoga.", "⚠️");
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            resolve(e.target.result);
-          };
-          reader.readAsDataURL(file);
-        });
-      }
+      const base64Content = await fileToBase64(file);
+      const cleanFileName = String(file.name || 'upload').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 180);
+      const fileName = `${Date.now()}_${cleanFileName}`;
+      const targetFolder = folder === 'gallery' || folder === 'events' || folder === 'notices'
+        ? folder
+        : String(config.folder || 'gallery').replace(/^\/+|\/+$/g, '');
+      const filePath = `${targetFolder}/${fileName}`;
+      const url = githubApiUrl(filePath);
 
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(file);
-        reader.onload = async function() {
-          try {
-            const arrayBuffer = reader.result;
-            const bytes = new Uint8Array(arrayBuffer);
-            let binary = '';
-            for (let i = 0; i < bytes.byteLength; i++) {
-              binary += String.fromCharCode(bytes[i]);
-            }
-            const base64Content = btoa(binary);
-            const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const fileName = `${Date.now()}_${cleanFileName}`;
-            const targetFolder = folder || config.folder || 'gallery';
-            const filePath = `${targetFolder}/${fileName}`;
-
-            const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${filePath}`;
-            
-            const res = await fetch(url, {
-              method: 'PUT',
-              headers: {
-                'Authorization': `Bearer ${config.token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-              },
-              body: JSON.stringify({
-                message: `CBSN-S Upload: ${fileName} via Admin Portal`,
-                content: base64Content,
-                branch: config.branch || 'main'
-              })
-            });
-
-            if (res.ok) {
-              const resData = await res.json();
-              const rawUrl = resData.content?.download_url || `https://raw.githubusercontent.com/${config.owner}/${config.repo}/${config.branch || 'main'}/${filePath}`;
-              showToast("GitHub Par Save Ho Gaya!", `File repository mein '${filePath}' par commit ho chuki hai.`, "🐙");
-              resolve(rawUrl);
-            } else {
-              const errData = await res.json().catch(() => ({}));
-              const errorMsg = errData.message || `HTTP Error ${res.status}`;
-              showToast("GitHub Upload Failed", `${errorMsg} (Check Token repo permission)`, "⛔");
-              
-              // Local preview fallback so UI doesn't crash
-              const fallbackReader = new FileReader();
-              fallbackReader.onload = () => resolve(fallbackReader.result);
-              fallbackReader.readAsDataURL(file);
-            }
-          } catch(error) {
-            showToast("Network Error", "GitHub se connect nahi ho saka.", "⛔");
-            const fallbackReader = new FileReader();
-            fallbackReader.onload = () => resolve(fallbackReader.result);
-            fallbackReader.readAsDataURL(file);
-          }
-        };
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: githubHeaders(true),
+        body: JSON.stringify({
+          message: `CBSN-S Upload: ${fileName} via Admin Portal`,
+          content: base64Content,
+          branch: config.branch || 'main'
+        })
       });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || `GitHub upload failed (${res.status}).`);
+
+      const rawUrl = sanitizeUrl(data.content?.download_url || `https://raw.githubusercontent.com/${config.owner}/${config.repo}/${encodeURIComponent(config.branch || 'main')}/${filePath}`);
+      if (!rawUrl) throw new Error('GitHub returned an invalid file URL.');
+
+      showToast('GitHub Saved', `Committed: ${filePath}`, '🐙');
+      return {
+        url: rawUrl,
+        path: filePath,
+        sha: data.content?.sha || data.commit?.sha || ''
+      };
     }
 
     async function syncMediaFromGitHub(showFeedback = false) {
       const config = state.githubConfig;
-      if (!config.owner || !config.repo) return;
+      if (!config.owner || !config.repo) return { added: 0, updated: 0, removed: 0 };
 
-      const headers = { 'Accept': 'application/vnd.github.v3+json' };
-      if (config.token) headers['Authorization'] = `Bearer ${config.token}`;
-
+      const headers = githubHeaders();
       let addedCount = 0;
-      const folders = ['gallery', 'events'];
+      let updatedCount = 0;
+      const syncedPaths = new Set();
+      const branch = config.branch || 'main';
 
       try {
-        for (const f of folders) {
-          const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${f}`;
-          const res = await fetch(url, { headers });
-          if (res.ok) {
-            const files = await res.json();
-            if (Array.isArray(files)) {
-              files.forEach(file => {
-                if (file.type === 'file' && /\.(jpe?g|png|webp|gif|svg)$/i.test(file.name)) {
-                  const rawUrl = file.download_url || `https://raw.githubusercontent.com/${config.owner}/${config.repo}/${config.branch || 'main'}/${file.path}`;
-                  const exists = state.gallery.some(g => g.url === rawUrl);
-                  if (!exists) {
-                    state.gallery.unshift({
-                      id: 'gh-' + (file.sha ? file.sha.substring(0, 8) : Date.now()),
-                      title: decodeURIComponent(file.name.replace(/^\d+_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ')),
-                      category: f === 'events' ? 'Campus' : 'Campus',
-                      date: new Date().toISOString().split('T')[0],
-                      url: rawUrl
-                    });
-                    addedCount++;
-                  }
-                }
-              });
+        for (const folder of ['gallery', 'events']) {
+          const url = `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
+          const treeRes = await fetch(url, { headers });
+          if (!treeRes.ok) throw new Error(`GitHub sync failed for ${folder} (${treeRes.status}).`);
+          const treeData = await treeRes.json();
+          const prefix = folder.replace(/^\/+|\/+$/g, '') + '/';
+          const remoteFiles = (treeData.tree || []).filter(file => file.type === 'blob' && file.path.startsWith(prefix) && /\.(jpe?g|png|webp|gif|svg)$/i.test(file.path));
+
+          for (const file of remoteFiles) {
+            const path = file.path;
+            syncedPaths.add(`${folder}:${path}`);
+            const rawUrl = sanitizeUrl(`https://raw.githubusercontent.com/${config.owner}/${config.repo}/${encodeURIComponent(branch)}/${path}`);
+            const list = folder === 'gallery' ? state.gallery : state.events;
+            const existing = list.find(item => item.githubPath === path || item.url === rawUrl);
+
+            if (!existing) {
+              const name = String(path.split('/').pop() || '').replace(/^\d+_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+              if (folder === 'gallery') {
+                state.gallery.unshift({ id: `gh-${file.sha || crypto.randomUUID()}`, title: escapeHtml(decodeURIComponent(name)), category: 'Campus', date: new Date().toISOString().split('T')[0], url: rawUrl, githubPath: path, githubSha: file.sha, source: 'github' });
+              } else {
+                state.events.unshift({ id: `gh-ev-${file.sha || crypto.randomUUID()}`, title: escapeHtml(decodeURIComponent(name)), category: 'Campus', date: new Date().toISOString().split('T')[0], venue: 'School Campus', desc: 'Imported from GitHub.', bannerUrl: rawUrl, githubPath: path, githubSha: file.sha, source: 'github' });
+              }
+              addedCount++;
+            } else {
+              const currentSha = existing.githubSha || '';
+              if (currentSha && currentSha !== file.sha) {
+                if (folder === 'gallery') existing.url = rawUrl;
+                else existing.bannerUrl = rawUrl;
+                existing.githubSha = file.sha;
+                updatedCount++;
+              }
+              existing.githubPath = path;
+              existing.source = 'github';
             }
           }
         }
 
+        saveStateToLocalStorage();
         renderGalleryGrid('all');
         renderAdminGalleryList();
+        renderAdminEventList();
+        renderUpcomingEventsBanner();
 
-        if (showFeedback) {
-          showToast("GitHub Sync Complete", `${addedCount} nayi images repository se fetch ki gayi hain.`, "🔄");
-        }
+        if (showFeedback) showToast('GitHub Sync Complete', `${addedCount} added, ${updatedCount} updated.`, '🔄');
+        return { added: addedCount, updated: updatedCount, removed: 0 };
       } catch (e) {
-        console.warn("GitHub auto-sync error:", e);
+        console.warn('GitHub sync error:', e);
+        if (showFeedback) showToast('GitHub Sync Failed', e.message || 'Unable to sync repository.', '⛔');
+        return { added: addedCount, updated: updatedCount, removed: 0, error: e.message };
       }
     }
 
     function handleSaveSheetEndpoint() {
+      if (!requireAdmin('save integration settings')) return;
       const url = document.getElementById('googleSheetWebhookUrl').value.trim();
       state.googleSheetUrl = url;
       localStorage.setItem('cbsn_sheet_url', url);
@@ -3252,6 +3415,7 @@
     }
 
     async function testGitHubConnection() {
+      if (!requireAdmin('test GitHub connection')) return;
       const config = state.githubConfig;
       const tokenInput = document.getElementById('ghTokenInput')?.value.trim();
       const ownerInput = document.getElementById('ghOwnerInput')?.value.trim();
@@ -3274,7 +3438,7 @@
           state.githubConfig.token = token;
           state.githubConfig.owner = owner;
           state.githubConfig.repo = repo;
-          localStorage.setItem('cbsn_gh_config', JSON.stringify(state.githubConfig));
+          localStorage.setItem('cbsn_gh_config', JSON.stringify({ owner, repo, branch: state.githubConfig.branch || 'main', folder: state.githubConfig.folder || 'gallery' }));
           showToast("Connected!", `Linked with ${repoData.full_name}`, "✅");
           syncMediaFromGitHub(true);
         } else {
@@ -3349,6 +3513,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       // 1. Load saved data from browser localStorage
       loadStateFromLocalStorage();
+      state.currentUser = null;
+      state.githubConfig.token = "";
 
       const mobileBtn = document.getElementById('mobileMenuBtn');
       if (mobileBtn) {
@@ -3367,10 +3533,8 @@
       if (evDate) evDate.value = today;
 
       // Populate GitHub & Sheets inputs if already saved
-      if (state.githubConfig.token) {
-        const ghToken = document.getElementById('ghTokenInput');
-        if (ghToken) ghToken.value = state.githubConfig.token;
-      }
+      const ghToken = document.getElementById('ghTokenInput');
+      if (ghToken) ghToken.value = '';
       if (state.googleSheetUrl) {
         const sheetInput = document.getElementById('googleSheetWebhookUrl');
         if (sheetInput) sheetInput.value = state.googleSheetUrl;
