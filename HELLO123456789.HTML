@@ -67,7 +67,8 @@
         visibility: visible;
       }
       #printableArea {
-        position: absolute;
+        display: block !important;
+        position: absolute !important;
         left: 0;
         top: 0;
         width: 100%;
@@ -75,6 +76,7 @@
         padding: 20px;
         background: white !important;
         color: black !important;
+        z-index: 2147483647 !important;
       }
       .no-print {
         display: none !important;
@@ -1400,9 +1402,9 @@
                       Attach Official Document / PDF
                       <span class="text-accent-600 font-semibold">(Auto-commits to GitHub)</span>
                     </label>
-                    <input type="file" id="newNoticeFile" accept=".pdf,.png,.jpg,.jpeg,.doc" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-600" />
+                    <input type="file" id="admitFormDocument" accept=".pdf,.png,.jpg,.jpeg,.doc" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-600" />
                   </div>
-                  <button type="submit" class="w-full py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs rounded-xl transition shadow">
+                  <button type="submit" id="btnIssueAdmitCard" class="w-full py-2.5 bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs rounded-xl transition shadow">
                     Issue Official Admit Card
                   </button>
                 </form>
@@ -1502,9 +1504,9 @@
                       Attach Official Document / PDF
                       <span class="text-accent-600 font-semibold">(Auto-commits to GitHub)</span>
                     </label>
-                    <input type="file" id="newNoticeFile" accept=".pdf,.png,.jpg,.jpeg,.doc" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-600" />
+                    <input type="file" id="resFormDocument" accept=".pdf,.png,.jpg,.jpeg,.doc" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-600" />
                   </div>
-                  <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-brand-950 font-bold text-xs rounded-xl transition shadow">
+                  <button type="submit" id="btnPublishResult" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-brand-950 font-bold text-xs rounded-xl transition shadow">
                     Publish & Store Result
                   </button>
                 </form>
@@ -1978,7 +1980,7 @@
         branch: "main",
         folder: "gallery"
       },
-      googleSheetUrl: "https://script.google.com/macros/s/AKfycbxrrBWiVbGF7FNuKD77aw1bbdoE4r0Bd2NJ8-4gB1Q2_VhGmKKUNg8XbQh9LNNS1NRv/exec"
+      googleSheetUrl: ""
     };
 
     let toastTimeout;
@@ -2455,9 +2457,12 @@
       e.target.reset();
     }
 
-    function handleAdminCreateAdmitCard(e) {
+    async function handleAdminCreateAdmitCard(e) {
       if (!requireAdmin('manage this record')) return;
       e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById('btnIssueAdmitCard');
+      const originalText = btn?.innerText || 'Issue Official Admit Card';
       const roll = document.getElementById('admitFormRoll').value.trim().toUpperCase();
       const sClass = document.getElementById('admitFormClass').value;
       const name = document.getElementById('admitFormName').value.trim();
@@ -2465,128 +2470,162 @@
       const center = document.getElementById('admitFormCenter').value.trim();
       const timing = document.getElementById('admitFormTiming').value.trim();
       const subjects = document.getElementById('admitFormSubjects').value.trim();
+      const documentInput = document.getElementById('admitFormDocument');
 
-      const cardObj = {
-        id: "adm-" + Date.now(),
-        roll,
-        name,
-        class: sClass,
-        examName,
-        center,
-        timing,
-        subjects,
-        issueDate: new Date().toISOString().split('T')[0],
-        barcode: "CBSN" + Date.now().toString().slice(-6)
-      };
+      try {
+        if (btn) { btn.disabled = true; btn.innerText = 'Saving Admit Card...'; }
 
-      state.admitCards = state.admitCards.filter(c => !(c.roll === roll && c.class === sClass));
-      state.admitCards.unshift(cardObj);
-      saveStateToLocalStorage();
-      renderAdminAdmitList();
-      syncToGoogleSheet('ADMIT_CARD_ISSUE', cardObj);
+        let attachment = null;
+        if (documentInput?.files?.length) {
+          if (btn) btn.innerText = 'Uploading Official Document...';
+          attachment = await uploadFileToGitHub(documentInput.files[0], 'admit-cards');
+        }
 
-      showToast("Admit Card Issued", `Issued for ${name} (${roll})`, "🎫");
-      e.target.reset();
+        const cardObj = {
+          id: 'adm-' + crypto.randomUUID(),
+          roll,
+          name,
+          class: sClass,
+          examName,
+          center,
+          timing,
+          subjects,
+          issueDate: new Date().toISOString().split('T')[0],
+          barcode: 'CBSN' + Date.now().toString().slice(-6),
+          fileUrl: attachment?.url || '',
+          fileName: attachment ? String(documentInput.files[0].name || 'Official Document') : '',
+          githubPath: attachment?.path || '',
+          githubSha: attachment?.sha || '',
+          source: attachment ? 'github' : 'local'
+        };
+
+        state.admitCards = state.admitCards.filter(c => !(String(c.roll || '').toUpperCase() === roll && c.class === sClass));
+        state.admitCards.unshift(cardObj);
+        saveStateToLocalStorage();
+        renderAdminAdmitList();
+        syncToGoogleSheet('ADMIT_CARD_ISSUE', cardObj);
+
+        showToast('Admit Card Issued', attachment ? `Admit card and document saved for ${name}.` : `Issued for ${name} (${roll})`, '🎫');
+        form.reset();
+      } catch (err) {
+        showToast('Admit Card Error', err.message || 'Failed to issue admit card.', '⛔');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = originalText; }
+      }
     }
 
-    function handleAdminCreateResult(e) {
+    async function handleAdminCreateResult(e) {
       if (!requireAdmin('manage this record')) return;
       e.preventDefault();
+      const form = e.target;
+      const btn = document.getElementById('btnPublishResult');
+      const originalText = btn?.innerText || 'Publish & Store Result';
       const roll = document.getElementById('resFormRoll').value.trim().toUpperCase();
       const term = document.getElementById('resFormTerm').value;
       const name = document.getElementById('resFormName').value.trim();
       const sClass = document.getElementById('resFormClass').value;
       const remarks = document.getElementById('resFormRemarks').value.trim();
+      const documentInput = document.getElementById('resFormDocument');
 
-      const eng = parseInt(document.getElementById('resScoreEng').value) || 0;
-      const math = parseInt(document.getElementById('resScoreMath').value) || 0;
-      const sci = parseInt(document.getElementById('resScoreSci').value) || 0;
-      const sst = parseInt(document.getElementById('resScoreSst').value) || 0;
-      const lang = parseInt(document.getElementById('resScoreLang').value) || 0;
-      const ai = parseInt(document.getElementById('resScoreAi').value) || 0;
+      const eng = Number(document.getElementById('resScoreEng').value);
+      const math = Number(document.getElementById('resScoreMath').value);
+      const sci = Number(document.getElementById('resScoreSci').value);
+      const sst = Number(document.getElementById('resScoreSst').value);
+      const lang = Number(document.getElementById('resScoreLang').value);
+      const ai = Number(document.getElementById('resScoreAi').value);
 
       const scoreSet = [eng, math, sci, sst, lang, ai];
-      if (scoreSet.some(v => !Number.isInteger(v) || v < 0 || v > 100)) { showToast('Invalid Marks', 'Every subject score must be between 0 and 100.', '⚠️'); return; }
+      if (scoreSet.some(v => !Number.isInteger(v) || v < 0 || v > 100)) {
+        showToast('Invalid Marks', 'Every subject score must be between 0 and 100.', '⚠️');
+        return;
+      }
 
-      const totalMarks = eng + math + sci + sst + lang + ai;
-      const maxMarks = 600;
-      const percentage = ((totalMarks / maxMarks) * 100).toFixed(2) + "%";
+      try {
+        if (btn) { btn.disabled = true; btn.innerText = 'Saving Result...'; }
 
-      let grade = "A1 (Distinction)";
-      const pctNum = parseFloat(percentage);
-      if (pctNum < 40) grade = "D (Needs Improvement)";
-      else if (pctNum < 60) grade = "C (Satisfactory)";
-      else if (pctNum < 75) grade = "B (Good)";
-      else if (pctNum < 90) grade = "A2 (Very Good)";
+        let attachment = null;
+        if (documentInput?.files?.length) {
+          if (btn) btn.innerText = 'Uploading Official Result Document...';
+          attachment = await uploadFileToGitHub(documentInput.files[0], 'results');
+        }
 
-      const resultObj = {
-        id: "res-" + Date.now(),
-        roll,
-        name,
-        class: sClass,
-        term,
-        scores: {
-          "English": eng,
-          "Mathematics": math,
-          "Science": sci,
-          "Social Studies": sst,
-          "2nd Language": lang,
-          "Computer/AI": ai
-        },
-        totalMarks,
-        maxMarks,
-        percentage,
-        grade,
-        remarks
-      };
+        const totalMarks = eng + math + sci + sst + lang + ai;
+        const maxMarks = 600;
+        const percentage = ((totalMarks / maxMarks) * 100).toFixed(2) + '%';
 
-      state.results = state.results.filter(r => !(r.roll === roll && r.term === term));
-      state.results.unshift(resultObj);
-      saveStateToLocalStorage();
-      renderAdminResultList();
-      syncToGoogleSheet('RESULT_PUBLISH', resultObj);
+        let grade = 'A1 (Distinction)';
+        const pctNum = Number(percentage.replace('%', ''));
+        if (pctNum < 40) grade = 'D (Needs Improvement)';
+        else if (pctNum < 60) grade = 'C (Satisfactory)';
+        else if (pctNum < 75) grade = 'B (Good)';
+        else if (pctNum < 90) grade = 'A2 (Very Good)';
 
-      showToast("Marksheet Published", `Published for ${name} (${percentage})`, "📊");
-      e.target.reset();
+        const resultObj = {
+          id: 'res-' + crypto.randomUUID(),
+          roll,
+          name,
+          class: sClass,
+          term,
+          scores: {
+            'English': eng,
+            'Mathematics': math,
+            'Science': sci,
+            'Social Studies': sst,
+            '2nd Language': lang,
+            'Computer/AI': ai
+          },
+          totalMarks,
+          maxMarks,
+          percentage,
+          grade,
+          remarks,
+          fileUrl: attachment?.url || '',
+          fileName: attachment ? String(documentInput.files[0].name || 'Official Result Document') : '',
+          githubPath: attachment?.path || '',
+          githubSha: attachment?.sha || '',
+          source: attachment ? 'github' : 'local'
+        };
+
+        state.results = state.results.filter(r => !(String(r.roll || '').toUpperCase() === roll && r.term === term));
+        state.results.unshift(resultObj);
+        saveStateToLocalStorage();
+        renderAdminResultList();
+        syncToGoogleSheet('RESULT_PUBLISH', resultObj);
+
+        showToast('Marksheet Published', attachment ? `Result and document saved for ${name}.` : `Published for ${name} (${percentage})`, '📊');
+        form.reset();
+      } catch (err) {
+        showToast('Result Error', err.message || 'Failed to publish result.', '⛔');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = originalText; }
+      }
     }
 
-async function syncToGoogleSheet(action, payload) {
-    if (!state.googleSheetUrl) {
-        console.warn("Google Sheets URL not configured.");
-        return false;
-    }
-
-    try {
-        await fetch(state.googleSheetUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
-            },
-            body: JSON.stringify({
-                action: action,
-                roll: payload?.roll || '',
-                name: payload?.name || payload?.studentName || '',
-                class: payload?.class || payload?.grade || '',
-                payload: payload || {}
-            })
+    async function syncToGoogleSheet(action, payload) {
+      const endpoint = String(state.googleSheetUrl || '').trim();
+      if (!endpoint) return { ok: false, skipped: true };
+      try {
+        const url = new URL(endpoint);
+        if (url.protocol !== 'https:') throw new Error('Google Sheets endpoint must use HTTPS.');
+        const res = await fetch(url.href, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            action,
+            roll: payload?.roll || '',
+            name: payload?.name || payload?.studentName || '',
+            class: payload?.class || payload?.grade || '',
+            payload
+          })
         });
-
-        console.log("Google Sheets request sent:", action);
-        return true;
-
-    } catch (error) {
-        console.error("Google Sheets sync failed:", error);
-
-        showToast(
-            "Sheet Sync Failed",
-            error.message || "Unable to reach Google Sheets.",
-            "⚠️"
-        );
-
-        return false;
+        return { ok: res.ok, status: res.status };
+      } catch (err) {
+        console.warn('Google Sheet sync notice:', err);
+        showToast('Sheet Sync Failed', err.message || 'Could not synchronize with Google Sheets.', '⚠️');
+        return { ok: false, error: err.message };
+      }
     }
-}
+
     function saveStateToLocalStorage() {
       try {
         localStorage.setItem('cbsn_gallery', JSON.stringify(state.gallery));
@@ -2831,6 +2870,7 @@ async function syncToGoogleSheet(action, payload) {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
               Print Official Admit Card
             </button>
+            ${card.fileUrl ? `<a href="${escapeHtml(sanitizeUrl(card.fileUrl))}" target="_blank" rel="noopener noreferrer" download class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">📎 Download ${escapeHtml(card.fileName || 'Document')}</a>` : ''}
           </div>
           <div class="grid sm:grid-cols-2 gap-2 text-xs text-slate-700">
             <div><strong>Exam:</strong> ${escapeHtml(card.examName)}</div>
@@ -2870,6 +2910,7 @@ async function syncToGoogleSheet(action, payload) {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
               Print Official Marksheet
             </button>
+            ${res.fileUrl ? `<a href="${escapeHtml(sanitizeUrl(res.fileUrl))}" target="_blank" rel="noopener noreferrer" download class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">📎 Download ${escapeHtml(res.fileName || 'Document')}</a>` : ''}
           </div>
           <div class="text-xs text-slate-700">
             <strong>Term:</strong> ${escapeHtml(res.term)} | <strong>Class:</strong> ${escapeHtml(res.class)} | <strong>Total Marks:</strong> ${escapeHtml(res.totalMarks)} / ${escapeHtml(res.maxMarks)}
@@ -2916,7 +2957,7 @@ async function syncToGoogleSheet(action, payload) {
           </div>
         </div>
       `;
-      window.print();
+      requestAnimationFrame(() => window.print());
     }
 
     function printOfficialMarksheet(resId) {
@@ -2954,7 +2995,7 @@ async function syncToGoogleSheet(action, payload) {
           </div>
         </div>
       `;
-      window.print();
+      requestAnimationFrame(() => window.print());
     }
 
     function toggleStudentAuthTab(mode) {
@@ -3096,7 +3137,7 @@ async function syncToGoogleSheet(action, payload) {
       const card = state.admitCards.find(c => c.roll.toUpperCase() === state.currentUser.roll.toUpperCase());
       const admitBox = document.getElementById('dashAdmitCardSummary');
       if (card) {
-        admitBox.innerHTML = `<div><strong>Exam:</strong> ${escapeHtml(card.examName)}</div><div><strong>Center:</strong> ${escapeHtml(card.center)}</div>`;
+        admitBox.innerHTML = `<div><strong>Exam:</strong> ${escapeHtml(card.examName)}</div><div><strong>Center:</strong> ${escapeHtml(card.center)}</div>${card.fileUrl ? `<a href="${escapeHtml(sanitizeUrl(card.fileUrl))}" target="_blank" rel="noopener noreferrer" download class="inline-flex mt-2 px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold text-xs">📎 Download Official Document</a>` : ''}`;
       } else {
         admitBox.innerHTML = `<span class="text-slate-400">No active admit card currently issued.</span>`;
       }
@@ -3104,7 +3145,7 @@ async function syncToGoogleSheet(action, payload) {
       const res = state.results.find(r => r.roll.toUpperCase() === state.currentUser.roll.toUpperCase());
       const resBox = document.getElementById('dashMarksheetSummary');
       if (res) {
-        resBox.innerHTML = `<div><strong>Term:</strong> ${escapeHtml(res.term)}</div><div><strong>Grade:</strong> ${escapeHtml(res.grade)} (${escapeHtml(res.percentage)})</div>`;
+        resBox.innerHTML = `<div><strong>Term:</strong> ${escapeHtml(res.term)}</div><div><strong>Grade:</strong> ${escapeHtml(res.grade)} (${escapeHtml(res.percentage)})</div>${res.fileUrl ? `<a href="${escapeHtml(sanitizeUrl(res.fileUrl))}" target="_blank" rel="noopener noreferrer" download class="inline-flex mt-2 px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold text-xs">📎 Download Official Document</a>` : ''}`;
       } else {
         resBox.innerHTML = `<span class="text-slate-400">No published report card yet.</span>`;
       }
@@ -3259,7 +3300,8 @@ async function syncToGoogleSheet(action, payload) {
             <div class="font-bold text-slate-900">${escapeHtml(item.name)} (${escapeHtml(item.roll)})</div>
             <div class="text-slate-500 text-[11px]">${item.class} • ${item.examName}</div>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap justify-end">
+            ${item.fileUrl ? `<a href="${escapeHtml(sanitizeUrl(item.fileUrl))}" target="_blank" rel="noopener noreferrer" download class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded hover:bg-emerald-100">📎 ${escapeHtml(item.fileName || 'Document')}</a>` : ''}
             <button onclick="printOfficialAdmitCard('${item.id}')" class="px-2.5 py-1 bg-brand-50 text-brand-700 font-bold rounded hover:bg-brand-100">
               Print
             </button>
@@ -3291,7 +3333,8 @@ async function syncToGoogleSheet(action, payload) {
             <div class="font-bold text-slate-900">${escapeHtml(item.name)} (${escapeHtml(item.roll)}) - ${escapeHtml(item.percentage)}</div>
             <div class="text-slate-500 text-[11px]">${item.term} • Grade: ${item.grade}</div>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap justify-end">
+            ${item.fileUrl ? `<a href="${escapeHtml(sanitizeUrl(item.fileUrl))}" target="_blank" rel="noopener noreferrer" download class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded hover:bg-emerald-100">📎 ${escapeHtml(item.fileName || 'Document')}</a>` : ''}
             <button onclick="printOfficialMarksheet('${item.id}')" class="px-2.5 py-1 bg-amber-50 text-amber-700 font-bold rounded hover:bg-amber-100">
               Marksheet
             </button>
